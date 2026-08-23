@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>RehabBot</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --blue:       #1A6BA0;
+    --blue-light: #E8F4FD;
+    --blue-mid:   #2D9CDB;
+    --green:      #27AE60;
+    --red:        #E74C3C;
+    --gray:       #6B7280;
+    --gray-light: #F3F6F9;
+    --white:      #FFFFFF;
+    --border:     #D1E3F0;
+    --text:       #1C2B3A;
+    --text-soft:  #5A7A94;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-light);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--blue);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(26,107,160,0.3);
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px 10px;
+  }
+
+  .header-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .header-title {
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .header-sub {
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  /* ЭКГ линия */
+  .ecg-strip {
+    width: 100%;
+    height: 36px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ecg-svg {
+    width: 200%;
+    height: 100%;
+    animation: ecg-scroll 3s linear infinite;
+  }
+
+  @keyframes ecg-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-soft);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+  }
+
+  /* ── MAIN ── */
+  .main { padding: 16px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(26,107,160,0.06);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── PLAN CARD ── */
+  .plan-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .plan-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-light);
+  }
+
+  .plan-item:last-child { border-bottom: none; }
+
+  .plan-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue-mid);
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  /* ── SCALE ── */
+  .scale-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .scale-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .scale-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--white);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .scale-btn span.num {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+  }
+
+  .scale-btn.selected {
+    border-color: var(--blue);
+    background: var(--blue-light);
+  }
+
+  .scale-btn.selected span.num { color: var(--blue); }
+
+  /* ── TEXTAREA ── */
+  .diary-textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    resize: none;
+    height: 100px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: var(--white);
+  }
+
+  .diary-textarea:focus { border-color: var(--blue-mid); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--blue);
+    color: white;
+    box-shadow: 0 4px 14px rgba(26,107,160,0.3);
+  }
+
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-sos {
+    background: var(--red);
+    color: white;
+    box-shadow: 0 4px 14px rgba(231,76,60,0.35);
+    animation: pulse-sos 2s infinite;
+  }
+
+  @keyframes pulse-sos {
+    0%, 100% { box-shadow: 0 4px 14px rgba(231,76,60,0.35); }
+    50%       { box-shadow: 0 4px 24px rgba(231,76,60,0.6); }
+  }
+
+  .btn-ghost {
+    background: var(--gray-light);
+    color: var(--text-soft);
+  }
+
+  /* ── STATS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .stat-box {
+    background: var(--blue-light);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--blue);
+    line-height: 1;
+  }
+
+  .stat-lbl {
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-top: 4px;
+  }
+
+  /* ── HISTORY ── */
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-light);
+  }
+
+  .history-item:last-child { border-bottom: none; }
+
+  .history-date {
+    font-size: 12px;
+    color: var(--text-soft);
+    min-width: 70px;
+  }
+
+  .history-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .badge {
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .badge-green { background: #E8F8EF; color: var(--green); }
+  .badge-red   { background: #FDECEA; color: var(--red); }
+
+  /* ── DOCTOR: пациенты ── */
+  .patient-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-light);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .patient-row:last-child { border-bottom: none; }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .patient-info { flex: 1; }
+
+  .patient-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .patient-meta {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 2px;
+  }
+
+  .chevron { color: var(--border); font-size: 18px; }
+
+  /* ── ANALYTICS CARD ── */
+  .analytics-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .alert-banner {
+    background: #FFF8E1;
+    border: 1px solid #FFD54F;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .alert-text { font-size: 13px; color: #5D4037; line-height: 1.5; }
+
+  /* ── SUCCESS STATE ── */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .success-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+
+  .success-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .success-sub {
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
+
+  /* ── SECTION header ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--blue);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-soft);
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-soft);
+    font-size: 14px;
+  }
+
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-content">
+    <div class="header-icon">🏥</div>
+    <div>
+      <div class="header-title">RehabBot</div>
+      <div class="header-sub" id="header-sub">Загрузка...</div>
+    </div>
+  </div>
+  <!-- ЭКГ -->
+  <div class="ecg-strip">
+    <svg class="ecg-svg" viewBox="0 0 800 36" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline
+        points="0,18 40,18 60,18 70,4 80,32 90,4 100,28 110,18 160,18 200,18 240,18 260,18 270,4 280,32 290,4 300,28 310,18 360,18 400,18 440,18 460,18 470,4 480,32 490,4 500,28 510,18 560,18 600,18 640,18 660,18 670,4 680,32 690,4 700,28 710,18 760,18 800,18"
+        fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs">
+  <div class="tab active" onclick="showTab('diary')" id="tab-diary">📓 Дневник</div>
+  <div class="tab" onclick="showTab('plan')" id="tab-plan">📋 План</div>
+  <div class="tab" onclick="showTab('stats')" id="tab-stats">📊 Статистика</div>
+</div>
+
+<!-- DOCTOR TABS -->
+<div class="tabs" id="doctor-tabs" style="display:none">
+  <div class="tab active" onclick="showDoctorTab('patients')" id="dtab-patients">👥 Пациенты</div>
+  <div class="tab" onclick="showDoctorTab('analytics')" id="dtab-analytics">📊 Аналитика</div>
+</div>
+
+<div class="main">
+
+  <!-- ══════════════════════════════════════════════
+       PATIENT: ДНЕВНИК
+  ══════════════════════════════════════════════ -->
+  <div class="page active" id="page-diary">
+
+    <div id="diary-form">
+      <div class="card">
+        <div class="card-title">💊 Как вы себя чувствуете сегодня?</div>
+
+        <div class="scale-label">Общее самочувствие</div>
+        <div class="scale-buttons" id="scale-wellbeing">
+          <button class="scale-btn" onclick="select('wellbeing',1)"><span>😞</span><span class="num">1</span></button>
+          <button class="scale-btn" onclick="select('wellbeing',2)"><span>😕</span><span class="num">2</span></button>
+          <button class="scale-btn" onclick="select('wellbeing',3)"><span>😐</span><span class="num">3</span></button>
+          <button class="scale-btn" onclick="select('wellbeing',4)"><span>🙂</span><span class="num">4</span></button>
+          <button class="scale-btn" onclick="select('wellbeing',5)"><span>😄</span><span class="num">5</span></button>
+        </div>
+
+        <div class="scale-label">Уровень боли</div>
+        <div class="scale-buttons" id="scale-pain">
+          <button class="scale-btn" onclick="select('pain',1)"><span>😣</span><span class="num">1</span></button>
+          <button class="scale-btn" onclick="select('pain',2)"><span>😖</span><span class="num">2</span></button>
+          <button class="scale-btn" onclick="select('pain',3)"><span>😐</span><span class="num">3</span></button>
+          <button class="scale-btn" onclick="select('pain',4)"><span>🙂</span><span class="num">4</span></button>
+          <button class="scale-btn" onclick="select('pain',5)"><span>😊</span><span class="num">5</span></button>
+        </div>
+
+        <div class="scale-label">Настроение</div>
+        <div class="scale-buttons" id="scale-mood">
+          <button class="scale-btn" onclick="select('mood',1)"><span>😔</span><span class="num">1</span></button>
+          <button class="scale-btn" onclick="select('mood',2)"><span>😞</span><span class="num">2</span></button>
+          <button class="scale-btn" onclick="select('mood',3)"><span>😐</span><span class="num">3</span></button>
+          <button class="scale-btn" onclick="select('mood',4)"><span>😊</span><span class="num">4</span></button>
+          <button class="scale-btn" onclick="select('mood',5)"><span>😄</span><span class="num">5</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">✅ Выполнение плана</div>
+        <div id="plan-checklist">
+          <div class="empty"><div class="empty-icon">📋</div>Загрузка плана...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📝 Заметки</div>
+        <textarea class="diary-textarea" id="diary-notes"
+          placeholder="Что беспокоит? Что получилось? Любые наблюдения..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitDiary()">
+        ✓ Сохранить дневник
+      </button>
+
+      <div style="height: 12px;"></div>
+
+      <button class="btn btn-sos" onclick="triggerSOS()">
+        🆘 SOS — Экстренный сигнал
+      </button>
+    </div>
+
+    <div class="success-screen" id="diary-success">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Дневник сохранён!</div>
+      <div class="success-sub">Отличная работа! Ваш врач получил уведомление.<br>Продолжайте в том же духе 💪</div>
+      <div style="height: 24px;"></div>
+      <button class="btn btn-ghost" onclick="resetDiary()">Заполнить ещё раз</button>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       PATIENT: ПЛАН
+  ══════════════════════════════════════════════ -->
+  <div class="page" id="page-plan">
+    <div class="card">
+      <div class="card-title">📋 Ваш план лечения</div>
+      <div id="plan-content">
+        <div class="loading"><div class="spinner"></div>Загрузка плана...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       PATIENT: СТАТИСТИКА
+  ══════════════════════════════════════════════ -->
+  <div class="page" id="page-stats">
+    <div class="card">
+      <div class="card-title">📊 Средние за 7 дней</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-val" id="avg-wellbeing">—</div>
+          <div class="stat-lbl">Самочувствие</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="avg-pain">—</div>
+          <div class="stat-lbl">Боль</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="avg-mood">—</div>
+          <div class="stat-lbl">Настроение</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 История дневника</div>
+      <div id="history-list">
+        <div class="loading"><div class="spinner"></div>Загрузка...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       DOCTOR: ПАЦИЕНТЫ
+  ══════════════════════════════════════════════ -->
+  <div class="page" id="page-patients">
+    <div class="card" id="patients-card">
+      <div class="card-title">👥 Мои пациенты</div>
+      <div id="patients-list">
+        <div class="loading"><div class="spinner"></div>Загрузка...</div>
+      </div>
+    </div>
+
+    <!-- Карточка пациента (скрыта) -->
+    <div id="patient-detail" style="display:none">
+      <button class="back-btn" onclick="showPatientsList()">← Назад к списку</button>
+      <div style="height:10px"></div>
+      <div class="card" id="patient-detail-card"></div>
+      <div class="card">
+        <div class="card-title">📓 Последние записи</div>
+        <div id="patient-diary-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       DOCTOR: АНАЛИТИКА
+  ══════════════════════════════════════════════ -->
+  <div class="page" id="page-analytics">
+    <div class="card">
+      <div class="card-title">📊 Аналитика по пациентам</div>
+      <div id="analytics-select">
+        <div class="empty"><div class="empty-icon">👆</div>Выберите пациента из вкладки «Пациенты», чтобы увидеть аналитику</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════
+// Telegram WebApp Init
+// ══════════════════════════════════════════════
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor('#1A6BA0');
+}
+
+// Данные от бота через initData
+let initData = {};
+let role = 'patient'; // 'patient' или 'doctor'
+let patientData = null;
+let diaryEntries = [];
+let myPatients = [];
+
+// ══════════════════════════════════════════════
+// Моковые данные (пока нет реального API)
+// ══════════════════════════════════════════════
+const MOCK_PATIENT = {
+  name: 'Иванов Иван Иванович',
+  age: 65,
+  stroke_date: 'январь 2024',
+  treatment_plan: `💊 Лекарства:
+• Варфарин 2.5мг — утром натощак
+• Аторвастатин 20мг — вечером
+• Аспирин 100мг — после завтрака
+
+🏃 Упражнения (ежедневно):
+• Сжимание кисти — 3 подхода по 10 раз
+• Ходьба — 30 минут
+• Артикуляционная гимнастика — 15 минут
+
+🎯 Цели недели:
+• Пройти не менее 10 000 шагов в день
+• Выполнять все упражнения без пропусков`,
+  plan_items: [
+    { id: 1, text: 'Варфарин утром', done: false },
+    { id: 2, text: 'Аторвастатин вечером', done: false },
+    { id: 3, text: 'Сжимание кисти (3×10)', done: false },
+    { id: 4, text: 'Ходьба 30 минут', done: false },
+    { id: 5, text: 'Артикуляционная гимнастика', done: false },
+  ]
+};
+
+const MOCK_DIARY = [
+  { date: '2026-08-19', wellbeing: 4, pain: 4, mood: 5, notes: 'Прошёл 8000 шагов' },
+  { date: '2026-08-18', wellbeing: 3, pain: 3, mood: 4, notes: 'Немного болела голова' },
+  { date: '2026-08-17', wellbeing: 4, pain: 5, mood: 4, notes: 'Выполнил все упражнения' },
+  { date: '2026-08-16', wellbeing: 2, pain: 2, mood: 3, notes: 'Плохо спал' },
+  { date: '2026-08-15', wellbeing: 4, pain: 4, mood: 5, notes: '' },
+];
+
+const MOCK_PATIENTS = [
+  { id: 1, name: 'Иванов Иван Иванович', age: 65, stroke: 'январь 2024', last_diary: 'сегодня', status: 'active', username: 'ivanov_ivan' },
+  { id: 2, name: 'Петрова Мария Сергеевна', age: 58, stroke: 'март 2024', last_diary: '2 дня назад', status: 'warning', username: 'petrova_ms' },
+  { id: 3, name: 'Сидоров Алексей Петрович', age: 72, stroke: 'ноябрь 2023', last_diary: 'не заполнял', status: 'danger', username: 'sidorov_ap' },
+];
+
+// ══════════════════════════════════════════════
+// Определяем роль (mock)
+// ══════════════════════════════════════════════
+function detectRole() {
+  // В реальном приложении роль передаётся через initData от бота
+  const url = new URL(window.location.href);
+  role = url.searchParams.get('role') || 'patient';
+
+  if (role === 'doctor') {
+    document.getElementById('tabs').style.display = 'none';
+    document.getElementById('doctor-tabs').style.display = 'flex';
+    document.getElementById('header-sub').textContent = 'Панель врача';
+    showDoctorTab('patients');
+  } else {
+    document.getElementById('header-sub').textContent = MOCK_PATIENT.name;
+    initPatientApp();
+  }
+}
+
+// ══════════════════════════════════════════════
+// PATIENT APP
+// ══════════════════════════════════════════════
+const selected = { wellbeing: 0, pain: 0, mood: 0 };
+const planDone = {};
+
+function initPatientApp() {
+  renderPlanChecklist();
+  renderPlanPage();
+  renderStats();
+}
+
+function renderPlanChecklist() {
+  const container = document.getElementById('plan-checklist');
+  container.innerHTML = MOCK_PATIENT.plan_items.map(item => `
+    <div class="plan-item" id="pitem-${item.id}">
+      <input type="checkbox" id="check-${item.id}"
+        style="width:18px;height:18px;accent-color:var(--blue);flex-shrink:0;margin-top:2px"
+        onchange="togglePlan(${item.id})">
+      <label for="check-${item.id}" style="font-size:14px;color:var(--text);cursor:pointer;line-height:1.4">
+        ${item.text}
+      </label>
+    </div>
+  `).join('');
+}
+
+function togglePlan(id) {
+  planDone[id] = document.getElementById(`check-${id}`).checked;
+}
+
+function renderPlanPage() {
+  const content = document.getElementById('plan-content');
+  const lines = MOCK_PATIENT.treatment_plan.split('\n');
+  content.innerHTML = lines.map(line => {
+    if (!line.trim()) return '<div style="height:8px"></div>';
+    if (line.startsWith('💊') || line.startsWith('🏃') || line.startsWith('🎯')) {
+      return `<div style="font-size:14px;font-weight:600;color:var(--blue);margin:12px 0 6px">${line}</div>`;
+    }
+    if (line.startsWith('•')) {
+      return `<div class="plan-item"><div class="plan-dot"></div><div style="font-size:14px;color:var(--text)">${line.slice(1).trim()}</div></div>`;
+    }
+    return `<div style="font-size:14px;color:var(--text);padding:2px 0">${line}</div>`;
+  }).join('');
+}
+
+function renderStats() {
+  const entries = MOCK_DIARY;
+  if (!entries.length) return;
+
+  const avg = (key) => (entries.reduce((s, e) => s + e[key], 0) / entries.length).toFixed(1);
+  document.getElementById('avg-wellbeing').textContent = avg('wellbeing');
+  document.getElementById('avg-pain').textContent = avg('pain');
+  document.getElementById('avg-mood').textContent = avg('mood');
+
+  const list = document.getElementById('history-list');
+  const emojis = ['', '😞', '😕', '😐', '🙂', '😄'];
+  list.innerHTML = entries.map(e => `
+    <div class="history-item">
+      <div class="history-date">${formatDate(e.date)}</div>
+      <div class="history-text">
+        ${emojis[e.wellbeing]} ${e.wellbeing}/5 &nbsp;·&nbsp; боль ${e.pain}/5 &nbsp;·&nbsp; настр. ${e.mood}/5
+        ${e.notes ? `<br><span style="color:var(--text-soft);font-size:12px">${e.notes}</span>` : ''}
+      </div>
+      <span class="badge ${e.wellbeing >= 4 ? 'badge-green' : e.wellbeing <= 2 ? 'badge-red' : ''}">
+        ${e.wellbeing >= 4 ? '✓' : e.wellbeing <= 2 ? '!' : '~'}
+      </span>
+    </div>
+  `).join('');
+}
+
+function select(scale, val) {
+  selected[scale] = val;
+  const btns = document.getElementById(`scale-${scale}`).querySelectorAll('.scale-btn');
+  btns.forEach((btn, i) => btn.classList.toggle('selected', i + 1 === val));
+}
+
+function submitDiary() {
+  if (!selected.wellbeing || !selected.pain || !selected.mood) {
+    tg?.showAlert('Пожалуйста, оцените все три показателя.');
+    return;
+  }
+
+  const notes = document.getElementById('diary-notes').value;
+  const planChecked = Object.values(planDone).filter(Boolean).length;
+  const total = MOCK_PATIENT.plan_items.length;
+
+  const summary = `Самочувствие: ${selected.wellbeing}/5, Боль: ${selected.pain}/5, Настроение: ${selected.mood}/5. Выполнено ${planChecked}/${total} задач плана.${notes ? ' ' + notes : ''}`;
+
+  // Отправляем данные в бот
+  tg?.sendData(JSON.stringify({
+    type: 'diary',
+    wellbeing: selected.wellbeing,
+    pain: selected.pain,
+    mood: selected.mood,
+    plan_done: planChecked,
+    plan_total: total,
+    notes: notes,
+    summary: summary
+  }));
+
+  document.getElementById('diary-form').style.display = 'none';
+  document.getElementById('diary-success').style.display = 'block';
+}
+
+function resetDiary() {
+  selected.wellbeing = selected.pain = selected.mood = 0;
+  document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('diary-notes').value = '';
+  Object.keys(planDone).forEach(k => delete planDone[k]);
+  renderPlanChecklist();
+  document.getElementById('diary-form').style.display = 'block';
+  document.getElementById('diary-success').style.display = 'none';
+}
+
+function triggerSOS() {
+  tg?.showConfirm(
+    '🆘 Отправить экстренный сигнал врачу?',
+    (confirmed) => {
+      if (confirmed) {
+        tg.sendData(JSON.stringify({ type: 'sos' }));
+        tg.showAlert('Сигнал SOS отправлен врачу! Ожидайте звонка. При критической ситуации — звоните 112!');
+      }
+    }
+  );
+}
+
+// ══════════════════════════════════════════════
+// DOCTOR APP
+// ══════════════════════════════════════════════
+function renderPatientsList() {
+  const list = document.getElementById('patients-list');
+  list.innerHTML = MOCK_PATIENTS.map(p => {
+    const statusColor = p.status === 'active' ? 'var(--green)' : p.status === 'warning' ? '#F39C12' : 'var(--red)';
+    const initials = p.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+    return `
+      <div class="patient-row" onclick="showPatientDetail(${p.id})">
+        <div class="avatar" style="background:${statusColor}">${initials}</div>
+        <div class="patient-info">
+          <div class="patient-name">${p.name}</div>
+          <div class="patient-meta">Возраст: ${p.age} · Инсульт: ${p.stroke}</div>
+          <div class="patient-meta" style="color:${statusColor}">Дневник: ${p.last_diary}</div>
+        </div>
+        <div class="chevron">›</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showPatientDetail(id) {
+  const patient = MOCK_PATIENTS.find(p => p.id === id);
+  if (!patient) return;
+
+  document.getElementById('patients-card').style.display = 'none';
+  document.getElementById('patient-detail').style.display = 'block';
+
+  const detailCard = document.getElementById('patient-detail-card');
+  detailCard.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div class="avatar" style="width:52px;height:52px;font-size:20px">${patient.name.split(' ').slice(0,2).map(w=>w[0]).join('')}</div>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">${patient.name}</div>
+        <div style="font-size:13px;color:var(--text-soft)">Возраст: ${patient.age} · @${patient.username}</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:13px;color:var(--text-soft);margin-bottom:4px">Дата инсульта</div>
+    <div style="font-size:14px;font-weight:500;margin-bottom:12px">${patient.stroke}</div>
+    <button class="btn btn-primary" onclick="showAnalyticsForPatient(${id})" style="font-size:13px;padding:10px">
+      📊 Посмотреть аналитику
+    </button>
+  `;
+
+  const diaryList = document.getElementById('patient-diary-list');
+  const emojis = ['','😞','😕','😐','🙂','😄'];
+  diaryList.innerHTML = MOCK_DIARY.map(e => `
+    <div class="history-item">
+      <div class="history-date">${formatDate(e.date)}</div>
+      <div class="history-text">
+        ${emojis[e.wellbeing]} ${e.wellbeing}/5 · боль ${e.pain}/5 · настр. ${e.mood}/5
+        ${e.notes ? `<br><span style="color:var(--text-soft);font-size:12px">${e.notes}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function showPatientsList() {
+  document.getElementById('patients-card').style.display = 'block';
+  document.getElementById('patient-detail').style.display = 'none';
+}
+
+function showAnalyticsForPatient(id) {
+  const patient = MOCK_PATIENTS.find(p => p.id === id);
+  showDoctorTab('analytics');
+
+  document.getElementById('analytics-select').innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:16px;font-weight:700">${patient.name}</div>
+      <div style="font-size:13px;color:var(--text-soft)">Аналитика за последние 7 дней</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stats-grid" style="margin:14px 0">
+      <div class="stat-box"><div class="stat-val">3.4</div><div class="stat-lbl">Среднее самочувствие</div></div>
+      <div class="stat-box"><div class="stat-val">3.6</div><div class="stat-lbl">Средняя боль</div></div>
+      <div class="stat-box"><div class="stat-val">4.2</div><div class="stat-lbl">Среднее настроение</div></div>
+    </div>
+    ${patient.status !== 'active' ? `
+    <div class="alert-banner">
+      <span>⚠️</span>
+      <div class="alert-text">Обратите внимание: пациент ${patient.status === 'danger' ? 'не заполнял дневник более 3 дней' : '2 дня подряд самочувствие ниже 3/5'}. Рекомендуется связаться с пациентом.</div>
+    </div>` : ''}
+    <div class="analytics-text">📋 Анализ ИИ:
+
+✅ Хорошо выполняет: приём лекарств, артикуляционную гимнастику.
+
+⚠️ Проблемные области: ходьба (выполняет только 3-4 дня из 7), когнитивные упражнения пропускает.
+
+📈 Динамика: незначительное улучшение самочувствия за последние 7 дней. Настроение стабильное.
+
+💡 Рекомендации: обсудить с пациентом барьеры для ежедневной ходьбы. Рассмотреть коррекцию плана упражнений.</div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+// НАВИГАЦИЯ
+// ══════════════════════════════════════════════
+function showTab(name) {
+  ['diary','plan','stats'].forEach(t => {
+    document.getElementById(`page-${t}`).classList.toggle('active', t === name);
+    document.getElementById(`tab-${t}`).classList.toggle('active', t === name);
+  });
+}
+
+function showDoctorTab(name) {
+  ['patients','analytics'].forEach(t => {
+    document.getElementById(`page-${t}`).classList.toggle('active', t === name);
+    document.getElementById(`dtab-${t}`).classList.toggle('active', t === name);
+  });
+  if (name === 'patients') renderPatientsList();
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+detectRole();
+</script>
+</body>
+</html>
