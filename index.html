@@ -514,14 +514,36 @@ async function showPatientDetail(idx) {
   }
 }
 
-function showAnalytics(idx) {
+async function showAnalytics(idx) {
   const p = allPatients[idx];
   showDoctorTab('analytics');
   document.getElementById('analytics-content').innerHTML = `
     <div style="font-size:15px;font-weight:700;margin-bottom:4px">${p.full_name}</div>
-    <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px">Аналитика формируется ботом и приходит врачу в Telegram после каждого заполнения дневника пациентом.</div>
-    <div class="empty"><div class="empty-icon">🤖</div>Аналитика ИИ доступна в Telegram после заполнения дневника пациентом</div>
+    <div class="loading"><div class="spinner"></div>Формирую аналитику ИИ...</div>
   `;
+
+  try {
+    const res = await fetch(
+      `${API}/api/doctor/patient_analytics?patient_user_id=${p.user_id}&init_data=${encodeURIComponent(initData)}`,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('analytics-content').innerHTML = `
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px">${p.full_name}</div>
+        <div class="divider"></div>
+        <div class="analytics-text">${data.analysis}</div>
+      `;
+    } else {
+      document.getElementById('analytics-content').innerHTML = `
+        <div class="empty"><div class="empty-icon">❌</div>Ошибка загрузки аналитики</div>
+      `;
+    }
+  } catch(e) {
+    document.getElementById('analytics-content').innerHTML = `
+      <div class="empty"><div class="empty-icon">⚠️</div>Ошибка: ${e.message}</div>
+    `;
+  }
 }
 
 function backToList() {
