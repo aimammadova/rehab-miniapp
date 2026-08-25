@@ -241,6 +241,11 @@ const initData = tg?.initData || '';
 const initDataUnsafe = tg?.initDataUnsafe || {};
 const userId = initDataUnsafe?.user?.id;
 
+// Отладка — показываем user_id в заголовке
+console.log('Telegram WebApp:', !!tg);
+console.log('initData length:', initData.length);
+console.log('userId:', userId);
+
 const scores = { wellbeing: 0, pain: 0, mood: 0 };
 const planChecks = {};
 let patientData = null;
@@ -251,7 +256,17 @@ let role = 'patient';
 async function init() {
   console.log('initData:', tg?.initData?.substring(0, 100));
   console.log('user id:', tg?.initDataUnsafe?.user?.id);
-  
+  if (!tg || !initData) {
+    document.getElementById('page-loading').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚠️</div>
+        Откройте приложение через кнопку в боте<br>
+        <small>tg: ${!!tg}, initData: ${initData.length} chars, userId: ${userId}</small>
+      </div>
+    `;
+    document.getElementById('page-loading').classList.add('active');
+    return;
+  }
   // Временно показываем user_id на экране
   document.getElementById('header-sub').textContent = 'ID: ' + (tg?.initDataUnsafe?.user?.id || 'нет');
   try {
