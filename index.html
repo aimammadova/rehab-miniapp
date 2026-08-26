@@ -241,11 +241,6 @@ const initData = tg?.initData || '';
 const initDataUnsafe = tg?.initDataUnsafe || {};
 const userId = initDataUnsafe?.user?.id;
 
-// Отладка — показываем user_id в заголовке
-console.log('Telegram WebApp:', !!tg);
-console.log('initData length:', initData.length);
-console.log('userId:', userId);
-
 const scores = { wellbeing: 0, pain: 0, mood: 0 };
 const planChecks = {};
 let patientData = null;
