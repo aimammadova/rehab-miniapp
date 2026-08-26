@@ -254,10 +254,6 @@ let role = 'patient';
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
-  console.log('initData:', tg?.initData?.substring(0, 100));
-  console.log('user id:', tg?.initDataUnsafe?.user?.id);
-  // Временно показываем user_id на экране
-  document.getElementById('header-sub').textContent = 'ID: ' + (tg?.initDataUnsafe?.user?.id || 'нет');
   try {
     // Пробуем загрузить как пациента
     const res = await fetch(`${API}/api/patient?init_data=${encodeURIComponent(initData)}`, {
