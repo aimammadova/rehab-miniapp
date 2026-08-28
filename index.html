@@ -409,6 +409,11 @@ async function init() {
       document.getElementById('header-sub').textContent = myData.full_name || 'Врач';
       document.getElementById('doctor-tabs').style.display = 'flex';
       alert('✅ Регистрация завершена! Добро пожаловать!');
+      tg?.showPopup({
+        title: 'Готово!',
+        message: 'Регистрация завершена! Добро пожаловать!',
+        buttons: [{type: 'ok'}]
+      });
       showDTab('patients');
     } else if (role === 'patient') {
       patientData = myData;
