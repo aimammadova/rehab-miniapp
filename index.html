@@ -865,6 +865,7 @@ function showTab(name) {
 }
 
 function showDTab(name) {
+  document.getElementById('page-loading').classList.remove('active');
   ['patients','add','profile'].forEach(t => {
     document.getElementById(`page-${t}`)?.classList.toggle('active', t===name);
     document.getElementById(`dtab-${t}`)?.classList.toggle('active', t===name);
