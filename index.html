@@ -415,6 +415,8 @@ async function init() {
         buttons: [{type: 'ok'}]
       });
       showDTab('patients');
+      // Показываем успех через 100мс
+      setTimeout(() => { window.confirm('✅ Регистрация завершена! Нажмите OK'); }, 100);
     } else if (role === 'patient') {
       patientData = myData;
       document.getElementById('header-sub').textContent = myData.full_name || 'Пациент';
