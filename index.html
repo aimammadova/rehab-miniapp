@@ -466,8 +466,8 @@ async function registerDoctor() {
     document.getElementById('page-reg').classList.remove('active');
     document.getElementById('reg-tabs').style.display = 'none';
     document.getElementById('doctor-tabs').style.display = 'flex';
-    showDTab('patients');
-    setTimeout(() => tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!'), 500);
+    tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!');
+    setTimeout(() => showDTab('patients'), 100);
   } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
 
