@@ -6,90 +6,121 @@
 <title>RehabBot</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  :root {
-    --blue: #1A6BA0; --blue-light: #E8F4FD; --blue-mid: #2D9CDB;
-    --green: #27AE60; --red: #E74C3C; --gray: #6B7280;
-    --gray-light: #F3F6F9; --white: #FFFFFF; --border: #D1E3F0;
-    --text: #1C2B3A; --text-soft: #5A7A94;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: var(--gray-light); color: var(--text); min-height: 100vh; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+  --blue:#1A6BA0; --blue-light:#E8F4FD; --blue-mid:#2D9CDB;
+  --green:#27AE60; --red:#E74C3C; --gray-light:#F3F6F9;
+  --white:#FFFFFF; --border:#D1E3F0; --text:#1C2B3A; --text-soft:#5A7A94;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--gray-light);color:var(--text);min-height:100vh;}
 
-  .header { background: var(--blue); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(26,107,160,0.3); }
-  .header-content { display: flex; align-items: center; gap: 10px; padding: 14px 20px 10px; }
-  .header-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .header-title { color: white; font-size: 17px; font-weight: 600; }
-  .header-sub { color: rgba(255,255,255,0.7); font-size: 12px; }
-  .ecg-strip { width: 100%; height: 36px; overflow: hidden; }
-  .ecg-svg { width: 200%; height: 100%; animation: ecg-scroll 3s linear infinite; }
-  @keyframes ecg-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+/* HEADER */
+.header{background:var(--blue);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(26,107,160,0.3);}
+.header-content{display:flex;align-items:center;gap:10px;padding:14px 20px 10px;}
+.header-icon{width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.header-title{color:white;font-size:17px;font-weight:600;}
+.header-sub{color:rgba(255,255,255,0.7);font-size:12px;}
+.ecg-strip{width:100%;height:36px;overflow:hidden;}
+.ecg-svg{width:200%;height:100%;animation:ecg-scroll 3s linear infinite;}
+@keyframes ecg-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
-  .tabs, .doctor-tabs { display: flex; background: var(--white); border-bottom: 1px solid var(--border); }
-  .tab { flex: 1; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 500; color: var(--text-soft); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
-  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+/* TABS */
+.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.tab{flex:1;min-width:80px;padding:12px 8px;text-align:center;font-size:12px;font-weight:500;color:var(--text-soft);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;white-space:nowrap;}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
 
-  .main { padding: 16px; }
-  .card { background: var(--white); border-radius: 16px; padding: 20px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(26,107,160,0.06); }
-  .card-title { font-size: 13px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; }
+/* MAIN */
+.main{padding:16px;}
+.card{background:var(--white);border-radius:16px;padding:20px;margin-bottom:12px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(26,107,160,0.06);}
+.card-title{font-size:13px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px;}
 
-  .scale-label { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
-  .scale-buttons { display: flex; gap: 8px; margin-bottom: 16px; }
-  .scale-btn { flex: 1; aspect-ratio: 1; border: 2px solid var(--border); border-radius: 12px; background: var(--white); font-size: 16px; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
-  .scale-btn span.num { font-size: 13px; font-weight: 600; color: var(--text-soft); }
-  .scale-btn.selected { border-color: var(--blue); background: var(--blue-light); }
-  .scale-btn.selected span.num { color: var(--blue); }
+/* SCALE */
+.scale-label{font-size:14px;font-weight:500;color:var(--text);margin-bottom:10px;}
+.scale-buttons{display:flex;gap:8px;margin-bottom:16px;}
+.scale-btn{flex:1;aspect-ratio:1;border:2px solid var(--border);border-radius:12px;background:var(--white);font-size:16px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.scale-btn span.num{font-size:13px;font-weight:600;color:var(--text-soft);}
+.scale-btn.selected{border-color:var(--blue);background:var(--blue-light);}
+.scale-btn.selected span.num{color:var(--blue);}
 
-  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-light); }
-  .check-item:last-child { border-bottom: none; }
+/* CHECKLIST */
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-light);}
+.check-item:last-child{border-bottom:none;}
+.check-item label{font-size:14px;cursor:pointer;line-height:1.4;}
 
-  textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); resize: none; height: 100px; outline: none; transition: border-color 0.2s; background: var(--white); }
-  textarea:focus { border-color: var(--blue-mid); }
+/* INPUTS */
+textarea,input[type=text],input[type=number],select{
+  width:100%;border:1.5px solid var(--border);border-radius:12px;
+  padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;
+  color:var(--text);outline:none;transition:border-color 0.2s;background:var(--white);}
+textarea{resize:none;height:90px;}
+textarea:focus,input:focus,select:focus{border-color:var(--blue-mid);}
 
-  .btn { width: 100%; padding: 15px; border: none; border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
-  .btn-primary { background: var(--blue); color: white; box-shadow: 0 4px 14px rgba(26,107,160,0.3); }
-  .btn-sos { background: var(--red); color: white; animation: pulse-sos 2s infinite; }
-  .btn-ghost { background: var(--gray-light); color: var(--text-soft); }
-  @keyframes pulse-sos { 0%,100% { box-shadow: 0 4px 14px rgba(231,76,60,0.35); } 50% { box-shadow: 0 4px 24px rgba(231,76,60,0.6); } }
+/* BUTTONS */
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;}
+.btn-primary{background:var(--blue);color:white;box-shadow:0 4px 14px rgba(26,107,160,0.3);}
+.btn-primary:active{transform:scale(0.98);}
+.btn-danger{background:var(--red);color:white;animation:pulse-sos 2s infinite;}
+.btn-ghost{background:var(--gray-light);color:var(--text-soft);}
+.btn-sm{padding:8px 16px;width:auto;font-size:13px;border-radius:10px;margin-bottom:0;}
+@keyframes pulse-sos{0%,100%{box-shadow:0 4px 14px rgba(231,76,60,0.35);}50%{box-shadow:0 4px 24px rgba(231,76,60,0.6);}}
 
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 4px; }
-  .stat-box { background: var(--blue-light); border-radius: 12px; padding: 12px 8px; text-align: center; }
-  .stat-val { font-size: 22px; font-weight: 700; color: var(--blue); }
-  .stat-lbl { font-size: 11px; color: var(--text-soft); margin-top: 4px; }
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-box{background:var(--blue-light);border-radius:12px;padding:12px 8px;text-align:center;}
+.stat-val{font-size:22px;font-weight:700;color:var(--blue);}
+.stat-lbl{font-size:11px;color:var(--text-soft);margin-top:4px;}
 
-  .history-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--gray-light); }
-  .history-item:last-child { border-bottom: none; }
-  .history-date { font-size: 12px; color: var(--text-soft); min-width: 60px; }
-  .history-text { font-size: 13px; color: var(--text); line-height: 1.4; flex: 1; }
-  .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; background: var(--blue-light); color: var(--blue); }
-  .badge-green { background: #E8F8EF; color: var(--green); }
-  .badge-red { background: #FDECEA; color: var(--red); }
+/* HISTORY */
+.history-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--gray-light);}
+.history-item:last-child{border-bottom:none;}
+.history-date{font-size:12px;color:var(--text-soft);min-width:60px;flex-shrink:0;}
+.history-text{font-size:13px;color:var(--text);line-height:1.5;flex:1;}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;}
+.badge-green{background:#E8F8EF;color:var(--green);}
+.badge-red{background:#FDECEA;color:var(--red);}
+.badge-blue{background:var(--blue-light);color:var(--blue);}
 
-  .patient-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--gray-light); cursor: pointer; }
-  .patient-row:last-child { border-bottom: none; }
-  .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--blue); color: white; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .patient-info { flex: 1; }
-  .patient-name { font-size: 14px; font-weight: 600; }
-  .patient-meta { font-size: 12px; color: var(--text-soft); margin-top: 2px; }
-  .chevron { color: var(--border); font-size: 18px; }
-  .back-btn { background: none; border: none; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+/* CHAT */
+.chat-messages{max-height:350px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:10px;}
+.msg{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;max-width:85%;}
+.msg-user{background:var(--blue);color:white;align-self:flex-end;border-bottom-right-radius:4px;}
+.msg-bot{background:var(--white);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px;}
+.chat-input-row{display:flex;gap:8px;}
+.chat-input-row textarea{height:44px;flex:1;padding:10px 14px;}
+.send-btn{width:44px;height:44px;border:none;border-radius:12px;background:var(--blue);color:white;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 
-  .plan-text { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+/* PATIENTS */
+.patient-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--gray-light);cursor:pointer;}
+.patient-row:last-child{border-bottom:none;}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--blue);color:white;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.patient-info{flex:1;}
+.patient-name{font-size:14px;font-weight:600;}
+.patient-meta{font-size:12px;color:var(--text-soft);margin-top:2px;}
+.chevron{color:var(--border);font-size:18px;}
+.back-btn{background:none;border:none;color:var(--blue);font-size:14px;font-weight:500;cursor:pointer;padding:0 0 12px;display:flex;align-items:center;gap:4px;}
 
-  .page { display: none; }
-  .page.active { display: block; }
-  .success-screen { display: none; text-align: center; padding: 40px 20px; }
-  .success-icon { font-size: 64px; margin-bottom: 16px; }
-  .success-title { font-size: 22px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
-  .success-sub { font-size: 14px; color: var(--text-soft); line-height: 1.6; }
+/* FORM */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:13px;font-weight:500;color:var(--text-soft);margin-bottom:6px;display:block;}
+.task-list{margin-bottom:12px;}
+.task-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--blue-light);border-radius:10px;margin-bottom:6px;font-size:13px;}
+.task-remove{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;margin-left:auto;}
+.task-add-row{display:flex;gap:8px;}
+.task-add-row input{flex:1;}
 
-  .loading { text-align: center; padding: 40px; color: var(--text-soft); font-size: 14px; }
-  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .empty { text-align: center; padding: 30px; color: var(--text-soft); font-size: 14px; }
-  .empty-icon { font-size: 36px; margin-bottom: 10px; }
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-  .analytics-text { font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+/* PAGES */
+.page{display:none;}.page.active{display:block;}
+.loading{text-align:center;padding:40px;color:var(--text-soft);font-size:14px;}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:30px;color:var(--text-soft);font-size:14px;}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.success-screen{text-align:center;padding:40px 20px;}
+.success-icon{font-size:64px;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px;}
+.success-sub{font-size:14px;color:var(--text-soft);line-height:1.6;}
 </style>
 </head>
 <body>
@@ -112,125 +143,239 @@
 
 <!-- PATIENT TABS -->
 <div class="tabs" id="patient-tabs" style="display:none">
-  <div class="tab active" onclick="showTab('diary')" id="tab-diary">📓 Дневник</div>
-  <div class="tab" onclick="showTab('plan')" id="tab-plan">📋 План</div>
-  <div class="tab" onclick="showTab('stats')" id="tab-stats">📊 Статистика</div>
+  <div class="tab active" onclick="showTab('diary')" id="ptab-diary">📓 Дневник</div>
+  <div class="tab" onclick="showTab('plan')" id="ptab-plan">📋 План</div>
+  <div class="tab" onclick="showTab('stats')" id="ptab-stats">📊 Статистика</div>
+  <div class="tab" onclick="showTab('chat')" id="ptab-chat">💬 Чат</div>
+  <div class="tab" onclick="showTab('sos')" id="ptab-sos">🆘 SOS</div>
 </div>
 
 <!-- DOCTOR TABS -->
 <div class="tabs" id="doctor-tabs" style="display:none">
-  <div class="tab active" onclick="showDoctorTab('patients')" id="dtab-patients">👥 Пациенты</div>
-  <div class="tab" onclick="showDoctorTab('analytics')" id="dtab-analytics">📊 Аналитика</div>
+  <div class="tab active" onclick="showDTab('patients')" id="dtab-patients">👥 Пациенты</div>
+  <div class="tab" onclick="showDTab('add')" id="dtab-add">➕ Добавить</div>
+  <div class="tab" onclick="showDTab('profile')" id="dtab-profile">👤 Профиль</div>
+</div>
+
+<!-- REGISTRATION TABS -->
+<div class="tabs" id="reg-tabs" style="display:none">
+  <div class="tab active" id="rtab">📝 Регистрация</div>
 </div>
 
 <div class="main">
 
-  <!-- LOADING -->
-  <div class="page active" id="page-loading">
-    <div class="loading"><div class="spinner"></div>Загрузка данных...</div>
-  </div>
-
-  <!-- PATIENT: ДНЕВНИК -->
-  <div class="page" id="page-diary">
-    <div id="diary-form">
-      <div class="card">
-        <div class="card-title">💊 Как вы себя чувствуете?</div>
-        <div class="scale-label">Общее самочувствие</div>
-        <div class="scale-buttons" id="scale-wellbeing">
-          <button class="scale-btn" onclick="sel('wellbeing',1)"><span>😞</span><span class="num">1</span></button>
-          <button class="scale-btn" onclick="sel('wellbeing',2)"><span>😕</span><span class="num">2</span></button>
-          <button class="scale-btn" onclick="sel('wellbeing',3)"><span>😐</span><span class="num">3</span></button>
-          <button class="scale-btn" onclick="sel('wellbeing',4)"><span>🙂</span><span class="num">4</span></button>
-          <button class="scale-btn" onclick="sel('wellbeing',5)"><span>😄</span><span class="num">5</span></button>
-        </div>
-        <div class="scale-label">Уровень боли</div>
-        <div class="scale-buttons" id="scale-pain">
-          <button class="scale-btn" onclick="sel('pain',1)"><span>😣</span><span class="num">1</span></button>
-          <button class="scale-btn" onclick="sel('pain',2)"><span>😖</span><span class="num">2</span></button>
-          <button class="scale-btn" onclick="sel('pain',3)"><span>😐</span><span class="num">3</span></button>
-          <button class="scale-btn" onclick="sel('pain',4)"><span>🙂</span><span class="num">4</span></button>
-          <button class="scale-btn" onclick="sel('pain',5)"><span>😊</span><span class="num">5</span></button>
-        </div>
-        <div class="scale-label">Настроение</div>
-        <div class="scale-buttons" id="scale-mood">
-          <button class="scale-btn" onclick="sel('mood',1)"><span>😔</span><span class="num">1</span></button>
-          <button class="scale-btn" onclick="sel('mood',2)"><span>😞</span><span class="num">2</span></button>
-          <button class="scale-btn" onclick="sel('mood',3)"><span>😐</span><span class="num">3</span></button>
-          <button class="scale-btn" onclick="sel('mood',4)"><span>😊</span><span class="num">4</span></button>
-          <button class="scale-btn" onclick="sel('mood',5)"><span>😄</span><span class="num">5</span></button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">✅ Выполнение плана</div>
-        <div id="plan-checklist"><div class="empty">Загрузка плана...</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">📝 Заметки</div>
-        <textarea id="diary-notes" placeholder="Что беспокоит? Что получилось?"></textarea>
-      </div>
-      <button class="btn btn-primary" onclick="submitDiary()">✓ Сохранить дневник</button>
-      <button class="btn btn-sos" onclick="triggerSOS()">🆘 SOS — Экстренный сигнал</button>
-    </div>
-    <div class="success-screen" id="diary-success">
-      <div class="success-icon">✅</div>
-      <div class="success-title">Дневник сохранён!</div>
-      <div class="success-sub">Отлично! Врач получил уведомление.<br>Продолжайте в том же духе 💪</div>
-      <div style="height:24px"></div>
-      <button class="btn btn-ghost" onclick="resetDiary()">Заполнить ещё раз</button>
-    </div>
-  </div>
-
-  <!-- PATIENT: ПЛАН -->
-  <div class="page" id="page-plan">
-    <div class="card">
-      <div class="card-title">📋 Ваш план лечения</div>
-      <div class="plan-text" id="plan-text">Загрузка...</div>
-    </div>
-  </div>
-
-  <!-- PATIENT: СТАТИСТИКА -->
-  <div class="page" id="page-stats">
-    <div class="card">
-      <div class="card-title">📊 Средние за 7 дней</div>
-      <div class="stats-grid">
-        <div class="stat-box"><div class="stat-val" id="avg-w">—</div><div class="stat-lbl">Самочувствие</div></div>
-        <div class="stat-box"><div class="stat-val" id="avg-p">—</div><div class="stat-lbl">Боль</div></div>
-        <div class="stat-box"><div class="stat-val" id="avg-m">—</div><div class="stat-lbl">Настроение</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">📅 История дневника</div>
-      <div id="history-list"><div class="loading"><div class="spinner"></div></div></div>
-    </div>
-  </div>
-
-  <!-- DOCTOR: ПАЦИЕНТЫ -->
-  <div class="page" id="page-patients">
-    <div class="card" id="patients-list-card">
-      <div class="card-title">👥 Мои пациенты</div>
-      <div id="patients-list"><div class="loading"><div class="spinner"></div></div></div>
-    </div>
-    <div id="patient-detail" style="display:none">
-      <button class="back-btn" onclick="backToList()">← Назад</button>
-      <div class="card" id="patient-detail-info"></div>
-      <div class="card">
-        <div class="card-title">📓 Последние записи</div>
-        <div id="patient-diary-entries"><div class="loading"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DOCTOR: АНАЛИТИКА -->
-  <div class="page" id="page-analytics">
-    <div class="card">
-      <div class="card-title">📊 Аналитика</div>
-      <div id="analytics-content">
-        <div class="empty"><div class="empty-icon">👆</div>Выберите пациента во вкладке «Пациенты»</div>
-      </div>
-    </div>
-  </div>
-
+<!-- LOADING -->
+<div class="page active" id="page-loading">
+  <div class="loading"><div class="spinner"></div>Загрузка...</div>
 </div>
+
+<!-- REGISTRATION -->
+<div class="page" id="page-reg">
+  <div class="card">
+    <div class="card-title">👋 Добро пожаловать!</div>
+    <p style="font-size:14px;color:var(--text-soft);margin-bottom:20px">Выберите вашу роль для начала работы</p>
+    <button class="btn btn-primary" onclick="showRegForm('doctor')">👨‍⚕️ Я врач</button>
+    <button class="btn btn-ghost" onclick="showPatientInfo()">🏥 Я пациент</button>
+  </div>
+
+  <!-- Форма врача -->
+  <div id="doctor-reg-form" style="display:none">
+    <div class="card">
+      <div class="card-title">👨‍⚕️ Регистрация врача</div>
+      <div class="form-group"><label class="form-label">ФИО</label><input type="text" id="dr-name" placeholder="Иванов Иван Иванович"></div>
+      <div class="form-group"><label class="form-label">Специальность</label><input type="text" id="dr-spec" placeholder="Невролог, реабилитолог..."></div>
+      <div class="form-group"><label class="form-label">Место работы</label><input type="text" id="dr-work" placeholder="Городская больница №1"></div>
+      <div class="form-group"><label class="form-label">Телефон</label><input type="text" id="dr-phone" placeholder="+7 999 999 99 99"></div>
+      <div class="form-group"><label class="form-label">Стаж</label><input type="text" id="dr-exp" placeholder="10 лет"></div>
+      <button class="btn btn-primary" onclick="registerDoctor()">✓ Зарегистрироваться</button>
+    </div>
+  </div>
+
+  <!-- Инфо для пациента -->
+  <div id="patient-info" style="display:none">
+    <div class="card">
+      <div class="card-title">🏥 Для пациентов</div>
+      <p style="font-size:14px;color:var(--text);line-height:1.7">
+        Доступ для пациентов осуществляется только через врача.<br><br>
+        Попросите вашего врача добавить вас в систему — после этого вы получите уведомление и сможете пользоваться приложением.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PATIENT PAGES ══════════ -->
+
+<!-- ДНЕВНИК -->
+<div class="page" id="page-diary">
+  <div id="diary-form">
+    <div class="card">
+      <div class="card-title">💊 Как вы себя чувствуете?</div>
+      <div class="scale-label">Общее самочувствие</div>
+      <div class="scale-buttons" id="sc-wellbeing">
+        <button class="scale-btn" onclick="scSel('wellbeing',1)"><span>😞</span><span class="num">1</span></button>
+        <button class="scale-btn" onclick="scSel('wellbeing',2)"><span>😕</span><span class="num">2</span></button>
+        <button class="scale-btn" onclick="scSel('wellbeing',3)"><span>😐</span><span class="num">3</span></button>
+        <button class="scale-btn" onclick="scSel('wellbeing',4)"><span>🙂</span><span class="num">4</span></button>
+        <button class="scale-btn" onclick="scSel('wellbeing',5)"><span>😄</span><span class="num">5</span></button>
+      </div>
+      <div class="scale-label">Уровень боли</div>
+      <div class="scale-buttons" id="sc-pain">
+        <button class="scale-btn" onclick="scSel('pain',1)"><span>😣</span><span class="num">1</span></button>
+        <button class="scale-btn" onclick="scSel('pain',2)"><span>😖</span><span class="num">2</span></button>
+        <button class="scale-btn" onclick="scSel('pain',3)"><span>😐</span><span class="num">3</span></button>
+        <button class="scale-btn" onclick="scSel('pain',4)"><span>🙂</span><span class="num">4</span></button>
+        <button class="scale-btn" onclick="scSel('pain',5)"><span>😊</span><span class="num">5</span></button>
+      </div>
+      <div class="scale-label">Настроение</div>
+      <div class="scale-buttons" id="sc-mood">
+        <button class="scale-btn" onclick="scSel('mood',1)"><span>😔</span><span class="num">1</span></button>
+        <button class="scale-btn" onclick="scSel('mood',2)"><span>😞</span><span class="num">2</span></button>
+        <button class="scale-btn" onclick="scSel('mood',3)"><span>😐</span><span class="num">3</span></button>
+        <button class="scale-btn" onclick="scSel('mood',4)"><span>😊</span><span class="num">4</span></button>
+        <button class="scale-btn" onclick="scSel('mood',5)"><span>😄</span><span class="num">5</span></button>
+      </div>
+    </div>
+    <div class="card" id="tasks-card" style="display:none">
+      <div class="card-title">✅ Выполнение плана</div>
+      <div id="diary-checklist"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📝 Заметки</div>
+      <textarea id="diary-notes" placeholder="Что беспокоит? Что получилось?"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="submitDiary()">✓ Сохранить дневник</button>
+  </div>
+  <div class="success-screen" id="diary-success" style="display:none">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Дневник сохранён!</div>
+    <div class="success-sub">Отлично! Врач получил уведомление.<br>Продолжайте в том же духе 💪</div>
+    <div style="height:20px"></div>
+    <button class="btn btn-ghost" onclick="resetDiary()">Заполнить ещё раз</button>
+  </div>
+</div>
+
+<!-- ПЛАН -->
+<div class="page" id="page-plan">
+  <div class="card">
+    <div class="card-title">📋 Ваш план лечения</div>
+    <div id="plan-content" style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--text)">Загрузка...</div>
+  </div>
+</div>
+
+<!-- СТАТИСТИКА -->
+<div class="page" id="page-stats">
+  <div class="card">
+    <div class="card-title">📊 Средние за 7 дней</div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val" id="avg-w">—</div><div class="stat-lbl">Самочувствие</div></div>
+      <div class="stat-box"><div class="stat-val" id="avg-p">—</div><div class="stat-lbl">Боль</div></div>
+      <div class="stat-box"><div class="stat-val" id="avg-m">—</div><div class="stat-lbl">Настроение</div></div>
+    </div>
+    <div id="tasks-stat" style="display:none">
+      <div class="divider"></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Выполнение плана</div>
+      <div id="tasks-stat-text" style="font-size:13px;color:var(--text-soft)"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 История</div>
+    <div id="history-list"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- ЧАТ -->
+<div class="page" id="page-chat">
+  <div class="card">
+    <div class="card-title">💬 Чат с ассистентом</div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg msg-bot">Здравствуйте! Я ваш помощник по реабилитации. Задайте любой вопрос о восстановлении после инсульта.</div>
+    </div>
+    <div class="chat-input-row">
+      <textarea id="chat-input" placeholder="Напишите вопрос..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+      <button class="send-btn" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- SOS -->
+<div class="page" id="page-sos">
+  <div class="card" style="text-align:center;padding:30px 20px">
+    <div style="font-size:64px;margin-bottom:16px">🆘</div>
+    <div style="font-size:20px;font-weight:700;color:var(--red);margin-bottom:12px">Экстренная помощь</div>
+    <div style="font-size:14px;color:var(--text-soft);line-height:1.6;margin-bottom:24px">
+      Нажмите кнопку если вам нужна срочная помощь.<br>
+      Врач получит немедленное уведомление.
+    </div>
+    <button class="btn btn-danger" onclick="triggerSOS()">🆘 Отправить сигнал врачу</button>
+    <div style="height:12px"></div>
+    <div style="font-size:13px;color:var(--text-soft)">При критической ситуации звоните <strong>112</strong></div>
+  </div>
+</div>
+
+<!-- ══════════ DOCTOR PAGES ══════════ -->
+
+<!-- ПАЦИЕНТЫ -->
+<div class="page" id="page-patients">
+  <div class="card" id="patients-list-card">
+    <div class="card-title">👥 Мои пациенты</div>
+    <div id="patients-list"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+  <!-- Карточка пациента -->
+  <div id="patient-detail" style="display:none">
+    <button class="back-btn" onclick="backToList()">← Назад</button>
+    <div class="card" id="patient-detail-info"></div>
+    <div class="card">
+      <div class="card-title">📓 Последние записи</div>
+      <div id="patient-diary-entries"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <div class="card" id="analytics-card" style="display:none">
+      <div class="card-title">🤖 Аналитика ИИ</div>
+      <div id="analytics-text" style="font-size:13px;line-height:1.7;white-space:pre-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ДОБАВИТЬ ПАЦИЕНТА -->
+<div class="page" id="page-add">
+  <div class="card">
+    <div class="card-title">➕ Новый пациент</div>
+    <div class="form-group"><label class="form-label">Telegram username</label><input type="text" id="p-username" placeholder="@username"></div>
+    <div class="form-group"><label class="form-label">ФИО</label><input type="text" id="p-name" placeholder="Иванов Иван Иванович"></div>
+    <div class="form-group"><label class="form-label">Возраст</label><input type="number" id="p-age" placeholder="65"></div>
+    <div class="form-group"><label class="form-label">Дата инсульта</label><input type="text" id="p-stroke-date" placeholder="январь 2024"></div>
+    <div class="form-group">
+      <label class="form-label">Тип инсульта</label>
+      <select id="p-stroke-type">
+        <option value="Ишемический">Ишемический</option>
+        <option value="Геморрагический">Геморрагический</option>
+        <option value="Неизвестно">Неизвестно</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Сопутствующие заболевания</label><input type="text" id="p-comorbidities" placeholder="нет"></div>
+
+    <div class="form-group">
+      <label class="form-label">📋 Задачи плана (добавляйте по одной)</label>
+      <div class="task-list" id="new-task-list"></div>
+      <div class="task-add-row">
+        <input type="text" id="new-task-input" placeholder="Например: Ходьба 30 минут" onkeydown="if(event.key==='Enter'){addTask();}">
+        <button class="btn btn-primary btn-sm" onclick="addTask()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="form-group"><label class="form-label">Дополнительные указания (необязательно)</label><textarea id="p-extra" placeholder="Особые рекомендации, лекарства..."></textarea></div>
+
+    <button class="btn btn-primary" onclick="addPatient()">✓ Добавить пациента</button>
+  </div>
+</div>
+
+<!-- ПРОФИЛЬ ВРАЧА -->
+<div class="page" id="page-profile">
+  <div class="card" id="doctor-profile-card">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+</div><!-- /main -->
 
 <script>
 const API = "https://belopuhov.ru";
@@ -238,89 +383,126 @@ const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#1A6BA0'); }
 
 const initData = tg?.initData || '';
-const initDataUnsafe = tg?.initDataUnsafe || {};
-const userId = initDataUnsafe?.user?.id;
+const tgUser = tg?.initDataUnsafe?.user || {};
 
-const scores = { wellbeing: 0, pain: 0, mood: 0 };
-const planChecks = {};
+let role = null;
+let myData = null;
 let patientData = null;
 let diaryData = [];
-let role = 'patient';
+let newTasks = [];
+let chatHistory = [];
+const scores = { wellbeing:0, pain:0, mood:0 };
+const taskChecks = {};
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   try {
-    // Пробуем загрузить как пациента
-    const res = await fetch(`${API}/api/patient?init_data=${encodeURIComponent(initData)}`, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
+    const res = await api('/api/me');
+    role = res.role;
+    myData = res.data;
 
-    if (res.ok) {
-      patientData = await res.json();
-      role = 'patient';
-      document.getElementById('header-sub').textContent = patientData.full_name || 'Пациент';
+    if (role === 'new') {
+      document.getElementById('header-sub').textContent = 'Регистрация';
+      showPage('reg');
+      document.getElementById('reg-tabs').style.display = 'flex';
+    } else if (role === 'doctor') {
+      document.getElementById('header-sub').textContent = myData.full_name || 'Врач';
+      document.getElementById('doctor-tabs').style.display = 'flex';
+      showDTab('patients');
+    } else if (role === 'patient') {
+      patientData = myData;
+      document.getElementById('header-sub').textContent = myData.full_name || 'Пациент';
       document.getElementById('patient-tabs').style.display = 'flex';
       await loadPatientData();
       showTab('diary');
-      return;
     }
-
-    // Пробуем как врача
-    const dres = await fetch(`${API}/api/doctor/patients?init_data=${encodeURIComponent(initData)}`, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
-
-    if (dres.ok) {
-      role = 'doctor';
-      document.getElementById('header-sub').textContent = 'Панель врача';
-      document.getElementById('doctor-tabs').style.display = 'flex';
-      showDoctorTab('patients');
-      return;
-    }
-
-    // Не найден
-    document.getElementById('page-loading').innerHTML = `
-      <div class="empty"><div class="empty-icon">❌</div>Пользователь не найден.<br>Обратитесь к врачу для подключения.</div>
-    `;
+  } catch(e) {
+    document.getElementById('page-loading').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div>Ошибка: ${e.message}</div>`;
     document.getElementById('page-loading').classList.add('active');
-
-  } catch (e) {
-    document.getElementById('page-loading').innerHTML = `
-      <div class="empty"><div class="empty-icon">⚠️</div>Ошибка подключения к серверу.<br>${e.message}</div>
-    `;
   }
+}
+
+// ── API HELPER ────────────────────────────────────────────────────────────────
+async function api(path, method='GET', body=null) {
+  const url = API + path + (method==='GET' && !path.includes('?') ? `?init_data=${encodeURIComponent(initData)}` : '');
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify({...body, init_data: initData});
+  const res = await fetch(method==='GET' ? url : API+path, opts);
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+// ── REGISTRATION ──────────────────────────────────────────────────────────────
+function showRegForm(type) {
+  if (type === 'doctor') {
+    document.getElementById('doctor-reg-form').style.display = 'block';
+    document.getElementById('patient-info').style.display = 'none';
+  }
+}
+
+function showPatientInfo() {
+  document.getElementById('patient-info').style.display = 'block';
+  document.getElementById('doctor-reg-form').style.display = 'none';
+}
+
+async function registerDoctor() {
+  const name = document.getElementById('dr-name').value.trim();
+  const spec = document.getElementById('dr-spec').value.trim();
+  const work = document.getElementById('dr-work').value.trim();
+  const phone = document.getElementById('dr-phone').value.trim();
+  const exp = document.getElementById('dr-exp').value.trim();
+  if (!name || !spec) { tg?.showAlert('Заполните ФИО и специальность'); return; }
+  try {
+    await api('/api/doctor/register', 'POST', {
+      full_name:name, speciality:spec, workplace:work, phone, experience:exp
+    });
+    tg?.showAlert('Регистрация завершена!');
+    await init();
+  } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
 
 // ── PATIENT ───────────────────────────────────────────────────────────────────
 async function loadPatientData() {
   try {
-    const res = await fetch(`${API}/api/diary?init_data=${encodeURIComponent(initData)}`, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
-    if (res.ok) diaryData = await res.json();
-  } catch(e) {}
-
-  renderPlan();
-  renderStats();
-  renderChecklist();
+    diaryData = await api('/api/diary');
+    renderStats();
+    renderPlan();
+    renderDiaryChecklist();
+  } catch(e) { console.log('diary error:', e); }
 }
 
 function renderPlan() {
-  const plan = patientData?.treatment_plan || 'План лечения не задан. Обратитесь к врачу.';
-  document.getElementById('plan-text').textContent = plan;
+  const plan = patientData?.treatment_plan || 'План не задан. Обратитесь к врачу.';
+  document.getElementById('plan-content').textContent = plan;
+}
 
-  // Чеклист из плана
-  const lines = plan.split('\n').filter(l => l.trim().startsWith('•') || l.trim().startsWith('-'));
-  if (lines.length) {
-    document.getElementById('plan-checklist').innerHTML = lines.map((line, i) => `
-      <div class="check-item">
-        <input type="checkbox" id="ch${i}" style="width:18px;height:18px;accent-color:var(--blue);flex-shrink:0;margin-top:2px" onchange="planChecks[${i}]=this.checked">
-        <label for="ch${i}" style="font-size:14px;cursor:pointer">${line.replace(/^[•\-]\s*/, '')}</label>
-      </div>
-    `).join('');
-  } else {
-    document.getElementById('plan-checklist').innerHTML = '<div class="empty">Пункты плана не найдены</div>';
+function renderDiaryChecklist() {
+  const plan = patientData?.treatment_plan || '';
+  const tasks = parseTasks(plan);
+  const card = document.getElementById('tasks-card');
+  const list = document.getElementById('diary-checklist');
+  if (!tasks.length) { card.style.display='none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = tasks.map((t,i) => `
+    <div class="check-item">
+      <input type="checkbox" id="task${i}" style="width:18px;height:18px;accent-color:var(--blue);flex-shrink:0;margin-top:2px" onchange="taskChecks[${i}]=this.checked">
+      <label for="task${i}">${t}</label>
+    </div>
+  `).join('');
+}
+
+function parseTasks(plan) {
+  if (!plan) return [];
+  const tasks = [];
+  for (const line of plan.split('\n')) {
+    const l = line.trim();
+    if (l.startsWith('•') || l.startsWith('-') || l.startsWith('–')) {
+      tasks.push(l.replace(/^[•\-–]\s*/, '').trim());
+    } else if (l && l[0] >= '1' && l[0] <= '9' && l.includes('.')) {
+      tasks.push(l.split('.').slice(1).join('.').trim());
+    }
   }
+  return tasks;
 }
 
 function renderStats() {
@@ -328,202 +510,265 @@ function renderStats() {
     document.getElementById('history-list').innerHTML = '<div class="empty"><div class="empty-icon">📓</div>Записей пока нет</div>';
     return;
   }
-
+  let wSum=0, pSum=0, mSum=0, tDone=0, tTotal=0, count=0;
   const emojis = ['','😞','😕','😐','🙂','😄'];
 
-  // Парсим answers для средних
-  let wSum=0, pSum=0, mSum=0, count=0;
-  diaryData.forEach(e => {
-    const m = e.answers?.match(/(\d)\/5.*?(\d)\/5.*?(\d)\/5/);
-    if (m) { wSum+=+m[1]; pSum+=+m[2]; mSum+=+m[3]; count++; }
-  });
+  document.getElementById('history-list').innerHTML = diaryData.map(e => {
+    let w='-', p='-', m='-', done=0, total=0, notes='';
+    try {
+      const d = JSON.parse(e.answers);
+      w=d.wellbeing; p=d.pain; m=d.mood;
+      done=d.tasks_done||0; total=d.tasks_total||0;
+      wSum+=w; pSum+=p; mSum+=m; count++;
+      tDone+=done; tTotal+=total;
+    } catch { }
+    notes = e.notes || '';
+    const date = new Date(e.created_at).toLocaleDateString('ru-RU', {day:'numeric',month:'short'});
+    const taskStr = total ? ` | задачи: ${done}/${total}` : '';
+    const badge = w >= 4 ? 'badge-green' : w <= 2 ? 'badge-red' : 'badge-blue';
+    const badgeTxt = w >= 4 ? '✓' : w <= 2 ? '!' : '~';
+    return `<div class="history-item">
+      <div class="history-date">${date}</div>
+      <div class="history-text">
+        ${emojis[w]||''} ${w}/5 · боль ${p}/5 · настр. ${m}/5${taskStr}
+        ${notes ? `<br><span style="color:var(--text-soft);font-size:12px">${notes}</span>` : ''}
+      </div>
+      <span class="badge ${badge}">${badgeTxt}</span>
+    </div>`;
+  }).join('');
 
   if (count) {
     document.getElementById('avg-w').textContent = (wSum/count).toFixed(1);
     document.getElementById('avg-p').textContent = (pSum/count).toFixed(1);
     document.getElementById('avg-m').textContent = (mSum/count).toFixed(1);
   }
-
-  document.getElementById('history-list').innerHTML = diaryData.map(e => {
-    const d = new Date(e.created_at);
-    const dateStr = d.toLocaleDateString('ru-RU', {day:'numeric',month:'short'});
-    return `
-      <div class="history-item">
-        <div class="history-date">${dateStr}</div>
-        <div class="history-text">
-          ${e.answers}
-          ${e.notes ? `<br><span style="color:var(--text-soft);font-size:12px">${e.notes}</span>` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
+  if (tTotal > 0) {
+    document.getElementById('tasks-stat').style.display = 'block';
+    const pct = Math.round(tDone/tTotal*100);
+    document.getElementById('tasks-stat-text').textContent = `${tDone} из ${tTotal} выполнено (${pct}%)`;
+  }
 }
 
-function renderChecklist() {}
-
-function sel(scale, val) {
+function scSel(scale, val) {
   scores[scale] = val;
-  document.getElementById(`scale-${scale}`).querySelectorAll('.scale-btn')
-    .forEach((b, i) => b.classList.toggle('selected', i+1===val));
+  document.getElementById(`sc-${scale}`).querySelectorAll('.scale-btn')
+    .forEach((b,i) => b.classList.toggle('selected', i+1===val));
 }
 
 async function submitDiary() {
   if (!scores.wellbeing || !scores.pain || !scores.mood) {
-    tg?.showAlert('Пожалуйста, оцените все три показателя.');
-    return;
+    tg?.showAlert('Пожалуйста, оцените все три показателя.'); return;
   }
-
+  const tasks = parseTasks(patientData?.treatment_plan || '');
+  const done = Object.values(taskChecks).filter(Boolean).length;
+  const answers = JSON.stringify({
+    wellbeing: scores.wellbeing, pain: scores.pain, mood: scores.mood,
+    tasks_done: done, tasks_total: tasks.length
+  });
   const notes = document.getElementById('diary-notes').value;
-  const done = Object.values(planChecks).filter(Boolean).length;
-  const answers = `Самочувствие: ${scores.wellbeing}/5, Боль: ${scores.pain}/5, Настроение: ${scores.mood}/5. Выполнено задач: ${done}`;
-
   try {
-    const res = await fetch(`${API}/api/diary`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-      body: JSON.stringify({ init_data: initData, answers, notes })
-    });
-
-    if (res.ok) {
-      document.getElementById('diary-form').style.display = 'none';
-      document.getElementById('diary-success').style.display = 'block';
-      tg?.sendData(JSON.stringify({ type: 'diary_saved', answers, notes }));
-    } else {
-      tg?.showAlert('Ошибка сохранения. Попробуйте ещё раз.');
-    }
-  } catch(e) {
-    tg?.showAlert('Ошибка соединения: ' + e.message);
-  }
+    await api('/api/diary', 'POST', { answers, notes });
+    document.getElementById('diary-form').style.display = 'none';
+    document.getElementById('diary-success').style.display = 'block';
+  } catch(e) { tg?.showAlert('Ошибка сохранения: ' + e.message); }
 }
 
 function resetDiary() {
   scores.wellbeing = scores.pain = scores.mood = 0;
   document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
   document.getElementById('diary-notes').value = '';
+  Object.keys(taskChecks).forEach(k => delete taskChecks[k]);
+  document.querySelectorAll('#diary-checklist input').forEach(c => c.checked = false);
   document.getElementById('diary-form').style.display = 'block';
   document.getElementById('diary-success').style.display = 'none';
 }
 
+// ── CHAT ──────────────────────────────────────────────────────────────────────
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  addChatMsg(msg, 'user');
+  addChatMsg('...', 'bot', 'typing-msg');
+
+  try {
+    const res = await api('/api/chat', 'POST', { message: msg });
+    document.querySelector('.typing-msg')?.remove();
+    addChatMsg(res.answer, 'bot');
+  } catch(e) {
+    document.querySelector('.typing-msg')?.remove();
+    addChatMsg('Ошибка соединения. Попробуйте ещё раз.', 'bot');
+  }
+}
+
+function addChatMsg(text, who, cls='') {
+  const div = document.createElement('div');
+  div.className = `msg msg-${who} ${cls}`;
+  div.textContent = text;
+  const msgs = document.getElementById('chat-messages');
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ── SOS ───────────────────────────────────────────────────────────────────────
 function triggerSOS() {
-  tg?.showConfirm('🆘 Отправить экстренный сигнал врачу?', confirmed => {
-    if (confirmed) {
+  tg?.showConfirm('🆘 Отправить экстренный сигнал врачу?', async confirmed => {
+    if (!confirmed) return;
+    try {
       tg.sendData(JSON.stringify({ type: 'sos' }));
-      tg.showAlert('SOS отправлен врачу! При критической ситуации звоните 112!');
-    }
+      tg?.showAlert('Сигнал SOS отправлен! При критической ситуации звоните 112!');
+    } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
   });
 }
 
 // ── DOCTOR ────────────────────────────────────────────────────────────────────
 let allPatients = [];
+let currentPatient = null;
 
-async function loadDoctorPatients() {
+async function loadPatients() {
   try {
-    const res = await fetch(`${API}/api/doctor/patients?init_data=${encodeURIComponent(initData)}`, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
-    if (res.ok) {
-      allPatients = await res.json();
-      renderPatientsList();
-    }
+    allPatients = await api('/api/doctor/patients');
+    renderPatients();
   } catch(e) {
-    document.getElementById('patients-list').innerHTML = `<div class="empty">Ошибка загрузки: ${e.message}</div>`;
+    document.getElementById('patients-list').innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`;
   }
 }
 
-function renderPatientsList() {
+function renderPatients() {
+  const list = document.getElementById('patients-list');
   if (!allPatients.length) {
-    document.getElementById('patients-list').innerHTML = '<div class="empty"><div class="empty-icon">👥</div>Пациентов пока нет</div>';
+    list.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>Пациентов пока нет.<br>Добавьте первого во вкладке «Добавить»</div>';
     return;
   }
-  document.getElementById('patients-list').innerHTML = allPatients.map((p, i) => {
-    const initials = (p.full_name || 'П').split(' ').slice(0,2).map(w=>w[0]).join('');
+  list.innerHTML = allPatients.map((p,i) => {
+    const initials = (p.full_name||'П').split(' ').slice(0,2).map(w=>w[0]).join('');
     const status = p.registered ? '✅' : '⏳';
-    return `
-      <div class="patient-row" onclick="showPatientDetail(${i})">
-        <div class="avatar">${initials}</div>
-        <div class="patient-info">
-          <div class="patient-name">${status} ${p.full_name || p.tg_username}</div>
-          <div class="patient-meta">Возраст: ${p.age || '—'} · Инсульт: ${p.stroke_date || '—'}</div>
-          <div class="patient-meta">@${p.tg_username}</div>
-        </div>
-        <div class="chevron">›</div>
+    return `<div class="patient-row" onclick="showPatient(${i})">
+      <div class="avatar">${initials}</div>
+      <div class="patient-info">
+        <div class="patient-name">${status} ${p.full_name||p.tg_username}</div>
+        <div class="patient-meta">@${p.tg_username} · ${p.age||'—'} лет · ${p.stroke_date||'—'}</div>
       </div>
-    `;
+      <div class="chevron">›</div>
+    </div>`;
   }).join('');
 }
 
-async function showPatientDetail(idx) {
-  const p = allPatients[idx];
+async function showPatient(idx) {
+  currentPatient = allPatients[idx];
+  const p = currentPatient;
   document.getElementById('patients-list-card').style.display = 'none';
   document.getElementById('patient-detail').style.display = 'block';
+  document.getElementById('analytics-card').style.display = 'none';
 
   document.getElementById('patient-detail-info').innerHTML = `
-    <div style="font-size:16px;font-weight:700;margin-bottom:8px">${p.full_name || p.tg_username}</div>
-    <div style="font-size:13px;color:var(--text-soft);margin-bottom:4px">Возраст: ${p.age || '—'}</div>
-    <div style="font-size:13px;color:var(--text-soft);margin-bottom:4px">Дата инсульта: ${p.stroke_date || '—'}</div>
-    <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px">Тип: ${p.stroke_type || '—'}</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:8px">${p.full_name||p.tg_username}</div>
+    <div style="font-size:13px;color:var(--text-soft)">@${p.tg_username} · ${p.age||'—'} лет</div>
+    <div style="font-size:13px;color:var(--text-soft)">Инсульт: ${p.stroke_date||'—'} (${p.stroke_type||'—'})</div>
+    <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px">Сопутствующие: ${p.comorbidities||'—'}</div>
     <div class="divider"></div>
     <div style="font-size:13px;font-weight:600;margin:10px 0 6px">📋 План лечения:</div>
-    <div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${p.treatment_plan || 'Не задан'}</div>
-    <div class="divider"></div>
-    <button class="btn btn-primary" onclick="showAnalytics(${idx})" style="margin-top:8px">📊 Аналитика ИИ</button>
+    <div style="font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:12px">${p.treatment_plan||'не задан'}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="loadAnalytics()" style="flex:1">🤖 Аналитика ИИ</button>
+      <button class="btn btn-ghost btn-sm" onclick="editPlan()" style="flex:1">✏️ Изменить план</button>
+    </div>
   `;
 
   if (p.user_id) {
     try {
-      const res = await fetch(`${API}/api/doctor/patient_diary?patient_user_id=${p.user_id}&init_data=${encodeURIComponent(initData)}`, {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      });
-      if (res.ok) {
-        const entries = await res.json();
-        document.getElementById('patient-diary-entries').innerHTML = entries.length
-          ? entries.map(e => {
-              const d = new Date(e.created_at).toLocaleDateString('ru-RU', {day:'numeric',month:'short'});
-              return `<div class="history-item">
-                <div class="history-date">${d}</div>
-                <div class="history-text">${e.answers}${e.notes ? `<br><span style="color:var(--text-soft);font-size:12px">${e.notes}</span>` : ''}</div>
-              </div>`;
-            }).join('')
-          : '<div class="empty">Записей пока нет</div>';
-      }
+      const entries = await api(`/api/doctor/patient_diary?patient_user_id=${p.user_id}`);
+      const emojis = ['','😞','😕','😐','🙂','😄'];
+      document.getElementById('patient-diary-entries').innerHTML = entries.length
+        ? entries.map(e => {
+            let w='-', p2='-', m='-', done=0, total=0;
+            try { const d=JSON.parse(e.answers); w=d.wellbeing; p2=d.pain; m=d.mood; done=d.tasks_done||0; total=d.tasks_total||0; } catch{}
+            const date = new Date(e.created_at).toLocaleDateString('ru-RU', {day:'numeric',month:'short'});
+            const taskStr = total ? ` | задачи: ${done}/${total}` : '';
+            return `<div class="history-item">
+              <div class="history-date">${date}</div>
+              <div class="history-text">${emojis[w]||''} ${w}/5 · боль ${p2}/5 · настр. ${m}/5${taskStr}${e.notes ? `<br><span style="font-size:12px;color:var(--text-soft)">${e.notes}</span>` : ''}</div>
+            </div>`;
+          }).join('')
+        : '<div class="empty">Записей пока нет</div>';
     } catch(e) {
-      document.getElementById('patient-diary-entries').innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`;
+      document.getElementById('patient-diary-entries').innerHTML = '<div class="empty">Ошибка загрузки</div>';
     }
   } else {
-    document.getElementById('patient-diary-entries').innerHTML = '<div class="empty">Пациент ещё не зарегистрировался в боте</div>';
+    document.getElementById('patient-diary-entries').innerHTML = '<div class="empty">Пациент ещё не открывал приложение</div>';
   }
 }
 
-async function showAnalytics(idx) {
-  const p = allPatients[idx];
-  showDoctorTab('analytics');
-  document.getElementById('analytics-content').innerHTML = `
-    <div style="font-size:15px;font-weight:700;margin-bottom:4px">${p.full_name}</div>
-    <div class="loading"><div class="spinner"></div>Формирую аналитику ИИ...</div>
-  `;
-
+async function loadAnalytics() {
+  if (!currentPatient?.user_id) { tg?.showAlert('Пациент ещё не зарегистрировался'); return; }
+  const card = document.getElementById('analytics-card');
+  const text = document.getElementById('analytics-text');
+  card.style.display = 'block';
+  text.textContent = 'Формирую аналитику...';
   try {
-    const res = await fetch(
-      `${API}/api/doctor/patient_analytics?patient_user_id=${p.user_id}&init_data=${encodeURIComponent(initData)}`,
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      document.getElementById('analytics-content').innerHTML = `
-        <div style="font-size:15px;font-weight:700;margin-bottom:12px">${p.full_name}</div>
-        <div class="divider"></div>
-        <div class="analytics-text">${data.analysis}</div>
-      `;
-    } else {
-      document.getElementById('analytics-content').innerHTML = `
-        <div class="empty"><div class="empty-icon">❌</div>Ошибка загрузки аналитики</div>
-      `;
-    }
-  } catch(e) {
-    document.getElementById('analytics-content').innerHTML = `
-      <div class="empty"><div class="empty-icon">⚠️</div>Ошибка: ${e.message}</div>
-    `;
-  }
+    const res = await api(`/api/doctor/patient_analytics?patient_user_id=${currentPatient.user_id}`);
+    text.textContent = res.analysis;
+  } catch(e) { text.textContent = 'Ошибка: ' + e.message; }
+}
+
+// Редактирование плана прямо в карточке
+let editTasks = [];
+function editPlan() {
+  const p = currentPatient;
+  editTasks = parseTasks(p.treatment_plan || '');
+  document.getElementById('patient-detail-info').innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px">✏️ Изменить план: ${p.full_name}</div>
+    <div class="form-group">
+      <label class="form-label">Задачи</label>
+      <div class="task-list" id="edit-task-list"></div>
+      <div class="task-add-row">
+        <input type="text" id="edit-task-input" placeholder="Новая задача" onkeydown="if(event.key==='Enter'){addEditTask();}">
+        <button class="btn btn-primary btn-sm" onclick="addEditTask()">+</button>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Дополнительные указания</label><textarea id="edit-extra" placeholder="Лекарства, особые рекомендации..."></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="savePlan()" style="flex:1">✓ Сохранить</button>
+      <button class="btn btn-ghost btn-sm" onclick="showPatient(allPatients.indexOf(currentPatient))" style="flex:1">Отмена</button>
+    </div>
+  `;
+  renderEditTasks();
+}
+
+function renderEditTasks() {
+  document.getElementById('edit-task-list').innerHTML = editTasks.map((t,i) =>
+    `<div class="task-item">• ${t}<button class="task-remove" onclick="removeEditTask(${i})">×</button></div>`
+  ).join('');
+}
+
+function addEditTask() {
+  const input = document.getElementById('edit-task-input');
+  if (!input.value.trim()) return;
+  editTasks.push(input.value.trim());
+  input.value = '';
+  renderEditTasks();
+}
+
+function removeEditTask(i) {
+  editTasks.splice(i, 1);
+  renderEditTasks();
+}
+
+async function savePlan() {
+  const extra = document.getElementById('edit-extra')?.value.trim() || '';
+  let plan = editTasks.map(t => `• ${t}`).join('\n');
+  if (extra) plan += `\n\n${extra}`;
+  try {
+    await api('/api/doctor/update_plan', 'POST', {
+      tg_username: currentPatient.tg_username,
+      treatment_plan: plan
+    });
+    currentPatient.treatment_plan = plan;
+    tg?.showAlert('План обновлён! Пациент получил уведомление.');
+    showPatient(allPatients.indexOf(currentPatient));
+  } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
 
 function backToList() {
@@ -531,25 +776,99 @@ function backToList() {
   document.getElementById('patient-detail').style.display = 'none';
 }
 
+// ── ДОБАВИТЬ ПАЦИЕНТА ─────────────────────────────────────────────────────────
+function addTask() {
+  const input = document.getElementById('new-task-input');
+  if (!input.value.trim()) return;
+  newTasks.push(input.value.trim());
+  input.value = '';
+  renderNewTasks();
+}
+
+function renderNewTasks() {
+  document.getElementById('new-task-list').innerHTML = newTasks.map((t,i) =>
+    `<div class="task-item">• ${t}<button class="task-remove" onclick="removeTask(${i})">×</button></div>`
+  ).join('');
+}
+
+function removeTask(i) {
+  newTasks.splice(i, 1);
+  renderNewTasks();
+}
+
+async function addPatient() {
+  const username = document.getElementById('p-username').value.trim().lstrip('@');
+  const name = document.getElementById('p-name').value.trim();
+  if (!username || !name) { tg?.showAlert('Заполните username и ФИО'); return; }
+
+  const extra = document.getElementById('p-extra').value.trim();
+  let plan = newTasks.map(t => `• ${t}`).join('\n');
+  if (extra) plan += `\n\n${extra}`;
+
+  try {
+    await api('/api/doctor/add_patient', 'POST', {
+      tg_username: username,
+      full_name: name,
+      age: document.getElementById('p-age').value,
+      stroke_date: document.getElementById('p-stroke-date').value,
+      stroke_type: document.getElementById('p-stroke-type').value,
+      comorbidities: document.getElementById('p-comorbidities').value || 'нет',
+      treatment_plan: plan
+    });
+    newTasks = [];
+    renderNewTasks();
+    ['p-username','p-name','p-age','p-stroke-date','p-comorbidities','p-extra'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    tg?.showAlert(`Пациент ${name} добавлен!`);
+    showDTab('patients');
+  } catch(e) {
+    tg?.showAlert('Ошибка: ' + (e.message === '400' ? 'Пациент уже добавлен' : e.message));
+  }
+}
+
+// Полифилл lstrip для строк
+String.prototype.lstrip = function(chars) {
+  let s = this;
+  while (s.length && chars.includes(s[0])) s = s.slice(1);
+  return s;
+};
+
+// ── ПРОФИЛЬ ВРАЧА ─────────────────────────────────────────────────────────────
+function renderDoctorProfile() {
+  const d = myData;
+  document.getElementById('doctor-profile-card').innerHTML = `
+    <div class="card-title">👨‍⚕️ Мой профиль</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:8px">${d.full_name||'—'}</div>
+    <div style="font-size:14px;color:var(--text-soft);margin-bottom:4px">${d.speciality||'—'}</div>
+    <div style="font-size:14px;color:var(--text-soft);margin-bottom:4px">${d.workplace||'—'}</div>
+    <div style="font-size:14px;color:var(--text-soft);margin-bottom:4px">📞 ${d.phone||'—'}</div>
+    <div style="font-size:14px;color:var(--text-soft)">⏳ Стаж: ${d.experience||'—'}</div>
+  `;
+}
+
 // ── НАВИГАЦИЯ ─────────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${name}`)?.classList.add('active');
+}
+
 function showTab(name) {
-  document.getElementById('page-loading').classList.remove('active');
-  ['diary','plan','stats'].forEach(t => {
-    document.getElementById(`page-${t}`).classList.toggle('active', t===name);
-    document.getElementById(`tab-${t}`).classList.toggle('active', t===name);
+  ['diary','plan','stats','chat','sos'].forEach(t => {
+    document.getElementById(`page-${t}`)?.classList.toggle('active', t===name);
+    document.getElementById(`ptab-${t}`)?.classList.toggle('active', t===name);
   });
 }
 
-function showDoctorTab(name) {
-  document.getElementById('page-loading').classList.remove('active');
-  ['patients','analytics'].forEach(t => {
-    document.getElementById(`page-${t}`).classList.toggle('active', t===name);
-    document.getElementById(`dtab-${t}`).classList.toggle('active', t===name);
+function showDTab(name) {
+  ['patients','add','profile'].forEach(t => {
+    document.getElementById(`page-${t}`)?.classList.toggle('active', t===name);
+    document.getElementById(`dtab-${t}`)?.classList.toggle('active', t===name);
   });
-  if (name === 'patients') loadDoctorPatients();
+  if (name==='patients') loadPatients();
+  if (name==='profile') renderDoctorProfile();
 }
 
-// ── START ─────────────────────────────────────────────────────────────────────
 init();
 </script>
 </body>
