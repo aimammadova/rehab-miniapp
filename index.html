@@ -408,8 +408,9 @@ async function init() {
     } else if (role === 'doctor') {
       document.getElementById('header-sub').textContent = myData.full_name || 'Врач';
       document.getElementById('doctor-tabs').style.display = 'flex';
-      tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!');
-      showDTab('patients');
+      tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!', () => {
+        showDTab('patients');
+      });
     } else if (role === 'patient') {
       patientData = myData;
       document.getElementById('header-sub').textContent = myData.full_name || 'Пациент';
