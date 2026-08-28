@@ -456,11 +456,12 @@ async function registerDoctor() {
     await api('/api/doctor/register', 'POST', {
       full_name:name, speciality:spec, workplace:work, phone, experience:exp
     });
-    myData = { full_name: name, speciality: spec, workplace: work, phone, experience: exp };
+    myData = { full_name:name, speciality:spec, workplace:work, phone, experience:exp };
+    role = 'doctor';
+    document.getElementById('page-loading').classList.remove('active');
+    document.getElementById('page-reg').classList.remove('active');
     document.getElementById('reg-tabs').style.display = 'none';
     document.getElementById('doctor-tabs').style.display = 'flex';
-    document.getElementById('doctor-reg-form').style.display = 'none';
-    document.getElementById('page-reg').classList.remove('active');
     showDTab('patients');
   } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
