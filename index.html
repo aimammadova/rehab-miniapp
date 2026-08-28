@@ -400,7 +400,7 @@ async function init() {
     const res = await api('/api/me');
     role = res.role;
     myData = res.data;
-
+    document.getElementById('page-loading').classList.remove('active');
     if (role === 'new') {
       document.getElementById('header-sub').textContent = 'Регистрация';
       showPage('reg');
@@ -456,8 +456,12 @@ async function registerDoctor() {
     await api('/api/doctor/register', 'POST', {
       full_name:name, speciality:spec, workplace:work, phone, experience:exp
     });
-    tg?.showAlert('Регистрация завершена!');
-    await init();
+    myData = { full_name: name, speciality: spec, workplace: work, phone, experience: exp };
+    document.getElementById('reg-tabs').style.display = 'none';
+    document.getElementById('doctor-tabs').style.display = 'flex';
+    document.getElementById('doctor-reg-form').style.display = 'none';
+    document.getElementById('page-reg').classList.remove('active');
+    showDTab('patients');
   } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
 
