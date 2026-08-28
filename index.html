@@ -408,7 +408,7 @@ async function init() {
     } else if (role === 'doctor') {
       document.getElementById('header-sub').textContent = myData.full_name || 'Врач';
       document.getElementById('doctor-tabs').style.display = 'flex';
-      tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!');
+      setTimeout(() => tg?.showAlert('✅ Регистрация завершена!'), 300);
       showDTab('patients');
     } else if (role === 'patient') {
       patientData = myData;
