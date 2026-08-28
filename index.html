@@ -409,14 +409,8 @@ async function init() {
       document.getElementById('header-sub').textContent = myData.full_name || 'Врач';
       document.getElementById('doctor-tabs').style.display = 'flex';
       alert('✅ Регистрация завершена! Добро пожаловать!');
-      tg?.showPopup({
-        title: 'Готово!',
-        message: 'Регистрация завершена! Добро пожаловать!',
-        buttons: [{type: 'ok'}]
-      });
       showDTab('patients');
-      // Показываем успех через 100мс
-      setTimeout(() => { window.confirm('✅ Регистрация завершена! Нажмите OK'); }, 100);
+      tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!');
     } else if (role === 'patient') {
       patientData = myData;
       document.getElementById('header-sub').textContent = myData.full_name || 'Пациент';
