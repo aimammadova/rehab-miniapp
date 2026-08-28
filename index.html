@@ -408,9 +408,11 @@ async function init() {
     } else if (role === 'doctor') {
       document.getElementById('header-sub').textContent = myData.full_name || 'Врач';
       document.getElementById('doctor-tabs').style.display = 'flex';
-      tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!', () => {
-        showDTab('patients');
-      });
+      showDTab('patients');
+      if (sessionStorage.getItem('just_registered')) {
+        sessionStorage.removeItem('just_registered');
+        setTimeout(() => tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!'), 500);
+      }
     } else if (role === 'patient') {
       patientData = myData;
       document.getElementById('header-sub').textContent = myData.full_name || 'Пациент';
@@ -465,6 +467,7 @@ async function registerDoctor() {
     document.getElementById('reg-tabs').style.display = 'none';
     document.getElementById('doctor-tabs').style.display = 'flex';
     showDTab('patients');
+    setTimeout(() => tg?.showAlert('✅ Регистрация завершена! Добро пожаловать!'), 500);
   } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
 
