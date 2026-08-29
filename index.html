@@ -715,9 +715,10 @@ async function showPatient(idx) {
 }
 
 async function loadAnalytics() {
-  if (!currentPatient) { tg?.showAlert('Выберите пациента'); return; }
-  if (!currentPatient.user_id) { tg?.showAlert('Пациент ещё не открывал приложение'); return; }
-  if (!currentPatient?.user_id) { tg?.showAlert('Пациент ещё не зарегистрировался'); return; }
+  if (!currentPatient || !currentPatient.user_id) { 
+    tg?.showAlert('Пациент ещё не открывал приложение'); 
+    return; 
+  }
   const card = document.getElementById('analytics-card');
   const text = document.getElementById('analytics-text');
   card.style.display = 'block';
