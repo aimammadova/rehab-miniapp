@@ -627,9 +627,11 @@ function triggerSOS() {
   tg?.showConfirm('🆘 Отправить экстренный сигнал врачу?', async confirmed => {
     if (!confirmed) return;
     try {
-      tg.sendData(JSON.stringify({ type: 'sos' }));
-      tg?.showAlert('Сигнал SOS отправлен! При критической ситуации звоните 112!');
-    } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
+      await api('/api/sos', 'POST', {});
+      tg?.showAlert('🆘 Сигнал SOS отправлен! При критической ситуации звоните 112!');
+    } catch(e) {
+      tg?.showAlert('Ошибка отправки: ' + e.message);
+    }
   });
 }
 
