@@ -397,7 +397,7 @@ const taskChecks = {};
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   try {
-    const res = await api('/api/me');
+    const res = await api(`/api/doctor/patient_analytics?patient_user_id=${currentPatient.user_id}`);
     role = res.role;
     myData = res.data;
     document.getElementById('page-loading').classList.remove('active');
@@ -721,7 +721,7 @@ async function loadAnalytics() {
   text.textContent = 'Формирую аналитику...';
   try {
     const res = await api(`/api/doctor/patient_analytics?patient_user_id=${currentPatient.user_id}`);
-    text.textContent = res.analysis;
+    text.innerHTML = parseMarkdown(res.analysis);
   } catch(e) { text.textContent = 'Ошибка: ' + e.message; }
 }
 
@@ -881,7 +881,16 @@ function showDTab(name) {
   if (name==='patients') loadPatients();
   if (name==='profile') renderDoctorProfile();
 }
-
+function parseMarkdown(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/^### (.*?)$/gm, '<div style="font-size:13px;font-weight:700;color:var(--blue);margin:10px 0 4px">$1</div>')
+    .replace(/^## (.*?)$/gm, '<div style="font-size:14px;font-weight:700;margin:12px 0 6px">$1</div>')
+    .replace(/^# (.*?)$/gm, '<div style="font-size:15px;font-weight:700;margin:14px 0 6px">$1</div>')
+    .replace(/^- (.*?)$/gm, '<div style="padding:2px 0 2px 12px">• $1</div>')
+    .replace(/\n/g, '<br>');
+}
 init();
 </script>
 </body>
