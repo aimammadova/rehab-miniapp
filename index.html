@@ -428,7 +428,8 @@ async function init() {
 
 // ── API HELPER ────────────────────────────────────────────────────────────────
 async function api(path, method='GET', body=null) {
-  const url = API + path + (method==='GET' && !path.includes('?') ? `?init_data=${encodeURIComponent(initData)}` : '');
+  const separator = path.includes('?') ? '&' : '?';
+  const url = API + path + (method==='GET' ? `${separator}init_data=${encodeURIComponent(initData)}` : '');
   const opts = { method, headers: {'Content-Type':'application/json'} };
   if (body) opts.body = JSON.stringify({...body, init_data: initData});
   const res = await fetch(method==='GET' ? url : API+path, opts);
