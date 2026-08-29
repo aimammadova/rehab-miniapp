@@ -692,7 +692,7 @@ async function showPatient(idx) {
 
   if (p.user_id) {
     try {
-      const entries = await api(`/api/doctor/patient_diary?patient_user_id=${p.user_id}&init_data=${encodeURIComponent(initData)}`);
+      const entries = await api(`/api/doctor/patient_diary?patient_user_id=${p.user_id}`);
       const emojis = ['','😞','😕','😐','🙂','😄'];
       document.getElementById('patient-diary-entries').innerHTML = entries.length
         ? entries.map(e => {
