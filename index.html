@@ -397,7 +397,7 @@ const taskChecks = {};
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   try {
-    const res = await api(`/api/doctor/patient_analytics?patient_user_id=${currentPatient.user_id}`);
+    const res = await api('/api/me');
     role = res.role;
     myData = res.data;
     document.getElementById('page-loading').classList.remove('active');
