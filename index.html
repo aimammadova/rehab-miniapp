@@ -706,7 +706,7 @@ async function showPatient(idx) {
             </div>`;
           }).join('')
         : '<div class="empty">Записей пока нет</div>';
-    } catch(e) {
+    } catch(err) {
       document.getElementById('patient-diary-entries').innerHTML = '<div class="empty">Ошибка загрузки</div>';
     }
   } else {
