@@ -208,57 +208,42 @@ textarea:focus,input:focus,select:focus{border-color:var(--blue-mid);}
 <!-- ДНЕВНИК -->
 <div class="page" id="page-diary">
   <div id="diary-form">
-    <div class="card">
-      <div class="card-title">💊 Как вы себя чувствуете?</div>
-      <div class="scale-label">Общее самочувствие</div>
-      <div class="scale-buttons" id="sc-wellbeing">
-        <button class="scale-btn" onclick="scSel('wellbeing',1)"><span>😞</span><span class="num">1</span></button>
-        <button class="scale-btn" onclick="scSel('wellbeing',2)"><span>😕</span><span class="num">2</span></button>
-        <button class="scale-btn" onclick="scSel('wellbeing',3)"><span>😐</span><span class="num">3</span></button>
-        <button class="scale-btn" onclick="scSel('wellbeing',4)"><span>🙂</span><span class="num">4</span></button>
-        <button class="scale-btn" onclick="scSel('wellbeing',5)"><span>😄</span><span class="num">5</span></button>
-      </div>
-      <div class="scale-label">Уровень боли</div>
-      <div class="scale-buttons" id="sc-pain">
-        <button class="scale-btn" onclick="scSel('pain',1)"><span>😊</span><span class="num">1</span></button>
-        <button class="scale-btn" onclick="scSel('pain',2)"><span>🙂</span><span class="num">2</span></button>
-        <button class="scale-btn" onclick="scSel('pain',3)"><span>😐</span><span class="num">3</span></button>
-        <button class="scale-btn" onclick="scSel('pain',4)"><span>😖</span><span class="num">4</span></button>
-        <button class="scale-btn" onclick="scSel('pain',5)"><span>😣</span><span class="num">5</span></button>
-      </div>
-      <div class="scale-label">Настроение</div>
-      <div class="scale-buttons" id="sc-mood">
-        <button class="scale-btn" onclick="scSel('mood',1)"><span>😔</span><span class="num">1</span></button>
-        <button class="scale-btn" onclick="scSel('mood',2)"><span>😞</span><span class="num">2</span></button>
-        <button class="scale-btn" onclick="scSel('mood',3)"><span>😐</span><span class="num">3</span></button>
-        <button class="scale-btn" onclick="scSel('mood',4)"><span>😊</span><span class="num">4</span></button>
-        <button class="scale-btn" onclick="scSel('mood',5)"><span>😄</span><span class="num">5</span></button>
-      </div>
+    <div class="card" id="diary-no-plan" style="display:none">
+      <div class="empty"><div class="empty-icon">📓</div>План ещё не составлен врачом.<br>Загляните позже.</div>
     </div>
-    <div class="card" id="tasks-card" style="display:none">
-      <div class="card-title">✅ Выполнение плана</div>
-      <div id="diary-checklist"></div>
+    <div id="diary-items-wrap" style="display:none">
+      <div class="card">
+        <div class="card-title" id="diary-day-title">📓 Дневник — день 1</div>
+        <div style="font-size:13px;color:var(--text-soft)">Опишите, как прошло выполнение каждого пункта плана</div>
+      </div>
+      <div id="diary-items-list"></div>
+      <button class="btn btn-primary" onclick="submitDiary()">✓ Сохранить дневник</button>
     </div>
-    <div class="card">
-      <div class="card-title">📝 Заметки</div>
-      <textarea id="diary-notes" placeholder="Что беспокоит? Что получилось?"></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="submitDiary()">✓ Сохранить дневник</button>
   </div>
   <div class="success-screen" id="diary-success" style="display:none">
     <div class="success-icon">✅</div>
     <div class="success-title">Дневник сохранён!</div>
     <div class="success-sub">Отлично! Врач получил уведомление.<br>Продолжайте в том же духе 💪</div>
-    <div style="height:20px"></div>
-    <button class="btn btn-ghost" onclick="resetDiary()">Заполнить ещё раз</button>
   </div>
 </div>
 
 <!-- ПЛАН -->
 <div class="page" id="page-plan">
+  <div class="card" id="plan-empty" style="display:none">
+    <div class="empty"><div class="empty-icon">📋</div>Врач ещё не составил план реабилитации.</div>
+  </div>
+  <div id="plan-wrap" style="display:none">
+    <div class="card">
+      <div class="card-title">📋 План реабилитации на 3 дня</div>
+      <div class="scale-buttons" id="plan-day-tabs" style="margin-bottom:0"></div>
+    </div>
+    <div class="card">
+      <div id="plan-day-items"></div>
+    </div>
+  </div>
   <div class="card">
-    <div class="card-title">📋 Ваш план лечения</div>
-    <div id="plan-content" style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--text)">Загрузка...</div>
+    <div class="card-title">💊 Лекарства</div>
+    <div id="my-medications"><div class="loading"><div class="spinner"></div></div></div>
   </div>
 </div>
 
@@ -324,12 +309,29 @@ textarea:focus,input:focus,select:focus{border-color:var(--blue-mid);}
   <div id="patient-detail" style="display:none">
     <button class="back-btn" onclick="backToList()">← Назад</button>
     <div class="card" id="patient-detail-info"></div>
+
     <div class="card">
-      <div class="card-title">📓 Последние записи</div>
+      <div class="card-title">📋 План реабилитации</div>
+      <div id="patient-plan-block"></div>
+    </div>
+
+    <div class="card" id="recommendation-card" style="display:none">
+      <div class="card-title">🤖 Рекомендация ИИ по итогам плана</div>
+      <div id="recommendation-block"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📓 Дневник выполнения плана</div>
       <div id="patient-diary-entries"><div class="loading"><div class="spinner"></div></div></div>
     </div>
+
+    <div class="card">
+      <div class="card-title">💊 Лекарства</div>
+      <div id="patient-meds-block"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
     <div class="card" id="analytics-card" style="display:none">
-      <div class="card-title">🤖 Аналитика ИИ</div>
+      <div class="card-title">🤖 Свободный ИИ-разбор пациента</div>
       <div id="analytics-text" style="font-size:13px;line-height:1.7;white-space:pre-wrap"></div>
     </div>
   </div>
@@ -342,7 +344,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--blue-mid);}
     <div class="form-group"><label class="form-label">Telegram username</label><input type="text" id="p-username" placeholder="@username"></div>
     <div class="form-group"><label class="form-label">ФИО</label><input type="text" id="p-name" placeholder="Иванов Иван Иванович"></div>
     <div class="form-group"><label class="form-label">Возраст</label><input type="number" id="p-age" placeholder="65"></div>
-    <div class="form-group"><label class="form-label">Дата инсульта</label><input type="text" id="p-stroke-date" placeholder="январь 2024"></div>
+    <div class="form-group"><label class="form-label">Дата инсульта</label><input type="text" id="p-stroke-date" placeholder="01.01.2026"></div>
     <div class="form-group">
       <label class="form-label">Тип инсульта</label>
       <select id="p-stroke-type">
@@ -351,18 +353,26 @@ textarea:focus,input:focus,select:focus{border-color:var(--blue-mid);}
         <option value="Неизвестно">Неизвестно</option>
       </select>
     </div>
-    <div class="form-group"><label class="form-label">Сопутствующие заболевания</label><input type="text" id="p-comorbidities" placeholder="нет"></div>
-
+    <div class="form-group"><label class="form-label">Поражённая сторона тела</label><input type="text" id="p-affected-side" placeholder="Левая / правая сторона"></div>
+    <div class="form-group"><label class="form-label">Сопутствующие заболевания</label><input type="text" id="p-comorbidities" placeholder="Гипертония, диабет и т.д."></div>
+    <div class="form-group"><label class="form-label">Двигательные нарушения</label><textarea id="p-motor" placeholder="Какая рука/нога, степень слабости"></textarea></div>
     <div class="form-group">
-      <label class="form-label">📋 Задачи плана (добавляйте по одной)</label>
-      <div class="task-list" id="new-task-list"></div>
-      <div class="task-add-row">
-        <input type="text" id="new-task-input" placeholder="Например: Ходьба 30 минут" onkeydown="if(event.key==='Enter'){addTask();}">
-        <button class="btn btn-primary btn-sm" onclick="addTask()">+ Добавить</button>
-      </div>
+      <label class="form-label">Способность к передвижению</label>
+      <select id="p-mobility">
+        <option value="Самостоятельно">Самостоятельно</option>
+        <option value="С опорой">С опорой</option>
+        <option value="Не ходит">Не ходит</option>
+      </select>
     </div>
-
-    <div class="form-group"><label class="form-label">Дополнительные указания (необязательно)</label><textarea id="p-extra" placeholder="Особые рекомендации, лекарства..."></textarea></div>
+    <div class="form-group"><label class="form-label">Речевые нарушения</label><input type="text" id="p-speech" placeholder="Есть/нет, степень"></div>
+    <div class="form-group"><label class="form-label">Когнитивные нарушения</label><input type="text" id="p-cognitive" placeholder="Память, внимание"></div>
+    <div class="form-group"><label class="form-label">Нарушения глотания</label><input type="text" id="p-swallowing" placeholder="Есть/нет"></div>
+    <div class="form-group"><label class="form-label">Самооценка состояния пациента</label><textarea id="p-self-assessment" placeholder="Развёрнутый ответ пациента"></textarea></div>
+    <div class="form-group"><label class="form-label">Психоэмоциональное состояние</label><input type="text" id="p-psycho" placeholder="Тревожность, апатия и т.д."></div>
+    <div class="form-group"><label class="form-label">Уровень бытовой независимости</label><input type="text" id="p-independence" placeholder="Сам ест, одевается, гигиена..."></div>
+    <div class="form-group"><label class="form-label">Болевой синдром</label><input type="text" id="p-pain" placeholder="Есть/нет, где"></div>
+    <div class="form-group"><label class="form-label">Особенности лечения, назначенные врачом</label><textarea id="p-treatment-features" placeholder="ЛФК, физиотерапия и т.д."></textarea></div>
+    <div class="form-group"><label class="form-label">Прочие индивидуальные особенности</label><textarea id="p-other" placeholder="Необязательно"></textarea></div>
 
     <button class="btn btn-primary" onclick="addPatient()">✓ Добавить пациента</button>
   </div>
@@ -389,10 +399,12 @@ let role = null;
 let myData = null;
 let patientData = null;
 let diaryData = [];
-let newTasks = [];
 let chatHistory = [];
-const scores = { wellbeing:0, pain:0, mood:0 };
-const taskChecks = {};
+let myPlan = null;
+let myPlanDay = 1;
+let diaryItems = [];
+let diaryPlanId = null;
+let diaryDayNumber = null;
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
@@ -477,43 +489,125 @@ async function loadPatientData() {
   try {
     diaryData = await api('/api/diary');
     renderStats();
-    renderPlan();
-    renderDiaryChecklist();
   } catch(e) { console.log('diary error:', e); }
+  await loadMyPlan();
+  await loadDiaryToday();
+  await loadMyMedications();
 }
 
-function renderPlan() {
-  const plan = patientData?.treatment_plan || 'План не задан. Обратитесь к врачу.';
-  document.getElementById('plan-content').textContent = plan;
+// ── ПЛАН (пациент) ───────────────────────────────────────────────────────────
+async function loadMyPlan() {
+  try {
+    const res = await api('/api/plan');
+    myPlan = res.plan;
+    if (!myPlan) {
+      document.getElementById('plan-empty').style.display = 'block';
+      document.getElementById('plan-wrap').style.display = 'none';
+      return;
+    }
+    document.getElementById('plan-empty').style.display = 'none';
+    document.getElementById('plan-wrap').style.display = 'block';
+    myPlanDay = res.day_number;
+    renderPlanDayTabs();
+    renderPlanDay(myPlanDay);
+  } catch(e) { console.log('plan error:', e); }
 }
 
-function renderDiaryChecklist() {
-  const plan = patientData?.treatment_plan || '';
-  const tasks = parseTasks(plan);
-  const card = document.getElementById('tasks-card');
-  const list = document.getElementById('diary-checklist');
-  if (!tasks.length) { card.style.display='none'; return; }
-  card.style.display = 'block';
-  list.innerHTML = tasks.map((t,i) => `
-    <div class="check-item">
-      <input type="checkbox" id="task${i}" style="width:18px;height:18px;accent-color:var(--blue);flex-shrink:0;margin-top:2px" onchange="taskChecks[${i}]=this.checked">
-      <label for="task${i}">${t}</label>
-    </div>
+function renderPlanDayTabs() {
+  document.getElementById('plan-day-tabs').innerHTML = [1,2,3].map(d => `
+    <button class="scale-btn" style="aspect-ratio:auto;padding:10px 0;${d===myPlanDay?'border-color:var(--blue);background:var(--blue-light)':''}"
+      onclick="renderPlanDay(${d})">День ${d}</button>
   `).join('');
 }
 
-function parseTasks(plan) {
-  if (!plan) return [];
-  const tasks = [];
-  for (const line of plan.split('\n')) {
-    const l = line.trim();
-    if (l.startsWith('•') || l.startsWith('-') || l.startsWith('–')) {
-      tasks.push(l.replace(/^[•\-–]\s*/, '').trim());
-    } else if (l && l[0] >= '1' && l[0] <= '9' && l.includes('.')) {
-      tasks.push(l.split('.').slice(1).join('.').trim());
-    }
+function renderPlanDay(day) {
+  document.querySelectorAll('#plan-day-tabs .scale-btn').forEach((b,i) => {
+    b.style.borderColor = (i+1===day) ? 'var(--blue)' : '';
+    b.style.background = (i+1===day) ? 'var(--blue-light)' : '';
+  });
+  const items = myPlan.plan_json[`day${day}`] || [];
+  document.getElementById('plan-day-items').innerHTML = items.length
+    ? items.map(it => `
+        <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:14px">${it.text}</div>
+          ${it.duration_minutes ? `<div style="font-size:12px;color:var(--text-soft);margin-top:2px">⏱ ${it.duration_minutes} мин</div>` : ''}
+        </div>`).join('')
+    : '<div class="empty">На этот день пунктов нет</div>';
+}
+
+// ── ЛЕКАРСТВА (пациент) ──────────────────────────────────────────────────────
+async function loadMyMedications() {
+  try {
+    const meds = await api('/api/medications');
+    document.getElementById('my-medications').innerHTML = meds.length
+      ? meds.map(m => `
+          <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:14px;font-weight:600">${m.name} ${m.dosage ? '· '+m.dosage : ''}</div>
+            <div style="font-size:12px;color:var(--text-soft)">⏰ ${m.times.join(', ')}</div>
+          </div>`).join('')
+      : '<div class="empty">Лекарства не назначены</div>';
+  } catch(e) {
+    document.getElementById('my-medications').innerHTML = '<div class="empty">Ошибка загрузки</div>';
   }
-  return tasks;
+}
+
+// ── ДНЕВНИК ПО ПУНКТАМ ПЛАНА (пациент) ───────────────────────────────────────
+async function loadDiaryToday() {
+  try {
+    const res = await api('/api/diary/today');
+    diaryPlanId = res.plan_id;
+    diaryDayNumber = res.day_number;
+    diaryItems = res.items;
+    if (!diaryPlanId || !diaryItems.length) {
+      document.getElementById('diary-no-plan').style.display = 'block';
+      document.getElementById('diary-items-wrap').style.display = 'none';
+      return;
+    }
+    document.getElementById('diary-no-plan').style.display = 'none';
+    document.getElementById('diary-items-wrap').style.display = 'block';
+    document.getElementById('diary-day-title').textContent = `📓 Дневник — день ${diaryDayNumber}`;
+    document.getElementById('diary-items-list').innerHTML = diaryItems.map((it, i) => `
+      <div class="card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px">${it.text}</div>
+        ${it.duration_minutes ? `
+          <div class="form-group" style="margin-bottom:8px">
+            <label class="form-label">Выполнено из ${it.duration_minutes} мин</label>
+            <input type="number" id="diary-frac-${i}" placeholder="0" value="${(it.done_fraction||'').split('/')[0]||''}" style="max-width:100px">
+          </div>` : ''}
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Как прошло, что почувствовали?</label>
+          <textarea id="diary-text-${i}" placeholder="Опишите ощущения, сложности...">${it.answer_text||''}</textarea>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { console.log('diary today error:', e); }
+}
+
+async function submitDiary() {
+  const entries = diaryItems.map((it, i) => {
+    const textEl = document.getElementById(`diary-text-${i}`);
+    const fracEl = document.getElementById(`diary-frac-${i}`);
+    return {
+      item_id: it.item_id,
+      item_text: it.text,
+      answer_text: textEl ? textEl.value.trim() : '',
+      done_fraction: (fracEl && fracEl.value !== '') ? `${fracEl.value}/${it.duration_minutes}` : null,
+    };
+  });
+  if (entries.some(e => !e.answer_text)) {
+    tg?.showAlert('Пожалуйста, опишите каждый пункт плана.'); return;
+  }
+  try {
+    await api('/api/diary/save', 'POST', { plan_id: diaryPlanId, day_number: diaryDayNumber, entries });
+    document.getElementById('diary-form').style.display = 'none';
+    document.getElementById('diary-success').style.display = 'block';
+  } catch(e) { tg?.showAlert('Ошибка сохранения: ' + e.message); }
+}
+
+function resetDiary() {
+  document.getElementById('diary-form').style.display = 'block';
+  document.getElementById('diary-success').style.display = 'none';
+  loadDiaryToday();
 }
 
 function renderStats() {
@@ -558,40 +652,6 @@ function renderStats() {
     const pct = Math.round(tDone/tTotal*100);
     document.getElementById('tasks-stat-text').textContent = `${tDone} из ${tTotal} выполнено (${pct}%)`;
   }
-}
-
-function scSel(scale, val) {
-  scores[scale] = val;
-  document.getElementById(`sc-${scale}`).querySelectorAll('.scale-btn')
-    .forEach((b,i) => b.classList.toggle('selected', i+1===val));
-}
-
-async function submitDiary() {
-  if (!scores.wellbeing || !scores.pain || !scores.mood) {
-    tg?.showAlert('Пожалуйста, оцените все три показателя.'); return;
-  }
-  const tasks = parseTasks(patientData?.treatment_plan || '');
-  const done = Object.values(taskChecks).filter(Boolean).length;
-  const answers = JSON.stringify({
-    wellbeing: scores.wellbeing, pain: scores.pain, mood: scores.mood,
-    tasks_done: done, tasks_total: tasks.length
-  });
-  const notes = document.getElementById('diary-notes').value;
-  try {
-    await api('/api/diary', 'POST', { answers, notes });
-    document.getElementById('diary-form').style.display = 'none';
-    document.getElementById('diary-success').style.display = 'block';
-  } catch(e) { tg?.showAlert('Ошибка сохранения: ' + e.message); }
-}
-
-function resetDiary() {
-  scores.wellbeing = scores.pain = scores.mood = 0;
-  document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('diary-notes').value = '';
-  Object.keys(taskChecks).forEach(k => delete taskChecks[k]);
-  document.querySelectorAll('#diary-checklist input').forEach(c => c.checked = false);
-  document.getElementById('diary-form').style.display = 'block';
-  document.getElementById('diary-success').style.display = 'none';
 }
 
 // ── CHAT ──────────────────────────────────────────────────────────────────────
@@ -669,55 +729,84 @@ function renderPatients() {
   }).join('');
 }
 
+const PROFILE_FIELDS = [
+  ['stroke_date', 'Дата инсульта'], ['stroke_type', 'Тип инсульта'], ['affected_side', 'Поражённая сторона'],
+  ['comorbidities', 'Сопутствующие заболевания'], ['motor_impairment', 'Двигательные нарушения'],
+  ['mobility', 'Передвижение'], ['speech_impairment', 'Речевые нарушения'],
+  ['cognitive_impairment', 'Когнитивные нарушения'], ['swallowing_impairment', 'Нарушения глотания'],
+  ['self_assessment', 'Самооценка состояния'], ['psycho_emotional', 'Психоэмоц. состояние'],
+  ['independence_level', 'Бытовая независимость'], ['pain_syndrome', 'Болевой синдром'],
+  ['treatment_features', 'Особенности лечения'], ['other_notes', 'Прочее'],
+];
+
 async function showPatient(idx) {
   currentPatient = allPatients[idx];
   const p = currentPatient;
   document.getElementById('patients-list-card').style.display = 'none';
   document.getElementById('patient-detail').style.display = 'block';
   document.getElementById('analytics-card').style.display = 'none';
+  document.getElementById('recommendation-card').style.display = 'none';
 
-  document.getElementById('patient-detail-info').innerHTML = `
-    <div style="font-size:16px;font-weight:700;margin-bottom:8px">${p.full_name||p.tg_username}</div>
-    <div style="font-size:13px;color:var(--text-soft)">@${p.tg_username} · ${p.age||'—'} лет</div>
-    <div style="font-size:13px;color:var(--text-soft)">Инсульт: ${p.stroke_date||'—'} (${p.stroke_type||'—'})</div>
-    <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px">Сопутствующие: ${p.comorbidities||'—'}</div>
-    <div class="divider"></div>
-    <div style="font-size:13px;font-weight:600;margin:10px 0 6px">📋 План лечения:</div>
-    <div style="font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:12px">${p.treatment_plan||'не задан'}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-primary btn-sm" onclick="loadAnalytics()" style="flex:1">🤖 Аналитика ИИ</button>
-      <button class="btn btn-ghost btn-sm" onclick="editPlan()" style="flex:1">✏️ Изменить план</button>
-    </div>
-  `;
+  renderPatientInfo(p);
 
   if (p.user_id) {
-    try {
-      const entries = await api(`/api/doctor/patient_diary?patient_user_id=${p.user_id}`);
-      const emojis = ['','😞','😕','😐','🙂','😄'];
-      document.getElementById('patient-diary-entries').innerHTML = entries.length
-        ? entries.map(e => {
-            let w='-', p2='-', m='-', done=0, total=0;
-            try { const d=JSON.parse(e.answers); w=d.wellbeing; p2=d.pain; m=d.mood; done=d.tasks_done||0; total=d.tasks_total||0; } catch{}
-            const date = new Date(e.created_at).toLocaleDateString('ru-RU', {day:'numeric',month:'short'});
-            const taskStr = total ? ` | задачи: ${done}/${total}` : '';
-            return `<div class="history-item">
-              <div class="history-date">${date}</div>
-              <div class="history-text">${emojis[w]||''} ${w}/5 · боль ${p2}/5 · настр. ${m}/5${taskStr}${e.notes ? `<br><span style="font-size:12px;color:var(--text-soft)">${e.notes}</span>` : ''}</div>
-            </div>`;
-          }).join('')
-        : '<div class="empty">Записей пока нет</div>';
-    } catch(err) {
-      document.getElementById('patient-diary-entries').innerHTML = '<div class="empty">Ошибка загрузки</div>';
-    }
+    loadPatientPlanDoctor(p.user_id);
+    loadPatientDiaryDoctor(p.user_id);
+    loadRecommendation(p.user_id);
+    loadPatientMedsDoctor(p.user_id);
   } else {
+    document.getElementById('patient-plan-block').innerHTML = '<div class="empty">Пациент ещё не открывал приложение</div>';
     document.getElementById('patient-diary-entries').innerHTML = '<div class="empty">Пациент ещё не открывал приложение</div>';
+    document.getElementById('patient-meds-block').innerHTML = '<div class="empty">Пациент ещё не открывал приложение</div>';
   }
 }
 
+function renderPatientInfo(p) {
+  const fieldsHtml = PROFILE_FIELDS.map(([k, label]) =>
+    p[k] ? `<div style="font-size:13px;margin-bottom:4px"><span style="color:var(--text-soft)">${label}:</span> ${p[k]}</div>` : ''
+  ).join('');
+  document.getElementById('patient-detail-info').innerHTML = `
+    <div style="font-size:16px;font-weight:700;margin-bottom:8px">${p.full_name||p.tg_username}</div>
+    <div style="font-size:13px;color:var(--text-soft);margin-bottom:10px">@${p.tg_username} · ${p.age||'—'} лет</div>
+    <div class="divider"></div>
+    <div style="margin:10px 0">${fieldsHtml || '<div class="empty">Профиль не заполнен</div>'}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="editProfile()" style="flex:1">✏️ Изменить профиль</button>
+      <button class="btn btn-primary btn-sm" onclick="loadAnalytics()" style="flex:1">🤖 ИИ-разбор</button>
+    </div>
+  `;
+}
+
+function editProfile() {
+  const p = currentPatient;
+  const inputsHtml = PROFILE_FIELDS.map(([k, label]) =>
+    `<div class="form-group"><label class="form-label">${label}</label><textarea id="ep-${k}" style="height:50px">${p[k]||''}</textarea></div>`
+  ).join('');
+  document.getElementById('patient-detail-info').innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px">✏️ Профиль: ${p.full_name}</div>
+    ${inputsHtml}
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="saveProfile()" style="flex:1">✓ Сохранить</button>
+      <button class="btn btn-ghost btn-sm" onclick="showPatient(allPatients.indexOf(currentPatient))" style="flex:1">Отмена</button>
+    </div>
+  `;
+}
+
+async function saveProfile() {
+  const fields = { init_data: initData, patient_user_id: currentPatient.user_id };
+  PROFILE_FIELDS.forEach(([k]) => { fields[k] = document.getElementById(`ep-${k}`).value; });
+  try {
+    await api('/api/doctor/update_profile', 'POST', fields);
+    Object.assign(currentPatient, fields);
+    tg?.showAlert('Профиль обновлён!');
+    showPatient(allPatients.indexOf(currentPatient));
+  } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
+}
+
 async function loadAnalytics() {
-  if (!currentPatient || !currentPatient.user_id) { 
-    tg?.showAlert('Пациент ещё не открывал приложение'); 
-    return; 
+  if (!currentPatient || !currentPatient.user_id) {
+    tg?.showAlert('Пациент ещё не открывал приложение');
+    return;
   }
   const card = document.getElementById('analytics-card');
   const text = document.getElementById('analytics-text');
@@ -729,61 +818,134 @@ async function loadAnalytics() {
   } catch(e) { text.textContent = 'Ошибка: ' + e.message; }
 }
 
-// Редактирование плана прямо в карточке
-let editTasks = [];
-function editPlan() {
-  const p = currentPatient;
-  editTasks = parseTasks(p.treatment_plan || '');
-  document.getElementById('patient-detail-info').innerHTML = `
-    <div style="font-size:15px;font-weight:700;margin-bottom:12px">✏️ Изменить план: ${p.full_name}</div>
-    <div class="form-group">
-      <label class="form-label">Задачи</label>
-      <div class="task-list" id="edit-task-list"></div>
-      <div class="task-add-row">
-        <input type="text" id="edit-task-input" placeholder="Новая задача" onkeydown="if(event.key==='Enter'){addEditTask();}">
-        <button class="btn btn-primary btn-sm" onclick="addEditTask()">+</button>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">Дополнительные указания</label><textarea id="edit-extra" placeholder="Лекарства, особые рекомендации..."></textarea></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary btn-sm" onclick="savePlan()" style="flex:1">✓ Сохранить</button>
-      <button class="btn btn-ghost btn-sm" onclick="showPatient(allPatients.indexOf(currentPatient))" style="flex:1">Отмена</button>
-    </div>
-  `;
-  renderEditTasks();
-}
-
-function renderEditTasks() {
-  document.getElementById('edit-task-list').innerHTML = editTasks.map((t,i) =>
-    `<div class="task-item">• ${t}<button class="task-remove" onclick="removeEditTask(${i})">×</button></div>`
-  ).join('');
-}
-
-function addEditTask() {
-  const input = document.getElementById('edit-task-input');
-  if (!input.value.trim()) return;
-  editTasks.push(input.value.trim());
-  input.value = '';
-  renderEditTasks();
-}
-
-function removeEditTask(i) {
-  editTasks.splice(i, 1);
-  renderEditTasks();
-}
-
-async function savePlan() {
-  const extra = document.getElementById('edit-extra')?.value.trim() || '';
-  let plan = editTasks.map(t => `• ${t}`).join('\n');
-  if (extra) plan += `\n\n${extra}`;
+// ── ПЛАН (врач) ───────────────────────────────────────────────────────────────
+async function loadPatientPlanDoctor(patientUserId) {
+  const block = document.getElementById('patient-plan-block');
+  block.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   try {
-    await api('/api/doctor/update_plan', 'POST', {
-      tg_username: currentPatient.tg_username,
-      treatment_plan: plan
-    });
-    currentPatient.treatment_plan = plan;
-    tg?.showAlert('План обновлён! Пациент получил уведомление.');
-    showPatient(allPatients.indexOf(currentPatient));
+    const res = await api(`/api/doctor/patient_plan?patient_user_id=${patientUserId}`);
+    if (!res.plan) {
+      block.innerHTML = `<div class="empty" style="margin-bottom:10px">План ещё не составлен</div>
+        <button class="btn btn-primary btn-sm" onclick="generatePlanForPatient(${patientUserId})">🤖 Сгенерировать план на 3 дня</button>`;
+      return;
+    }
+    const days = [1,2,3].map(d => {
+      const items = res.plan.plan_json[`day${d}`] || [];
+      return `<div style="margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600;${d===res.day_number?'color:var(--blue)':''}">День ${d}${d===res.day_number?' (сегодня)':''}</div>
+        ${items.map(it => `<div style="font-size:13px;padding:2px 0 2px 8px">• ${it.text}${it.duration_minutes?` (${it.duration_minutes} мин)`:''}</div>`).join('')}
+      </div>`;
+    }).join('');
+    block.innerHTML = `${days}
+      <button class="btn btn-ghost btn-sm" onclick="generatePlanForPatient(${patientUserId})" style="width:100%;margin-top:6px">🔄 Сгенерировать новый план</button>`;
+  } catch(e) { block.innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`; }
+}
+
+async function generatePlanForPatient(patientUserId) {
+  tg?.showConfirm('Сгенерировать новый план на 3 дня? ИИ учтёт весь профиль пациента.', async (ok) => {
+    if (!ok) return;
+    try {
+      await api('/api/doctor/generate_plan', 'POST', { patient_user_id: patientUserId });
+      tg?.showAlert('Новый план готов! Пациент получил уведомление.');
+      loadPatientPlanDoctor(patientUserId);
+    } catch(e) { tg?.showAlert('Ошибка генерации: ' + e.message); }
+  });
+}
+
+// ── ДНЕВНИК (врач) ────────────────────────────────────────────────────────────
+async function loadPatientDiaryDoctor(patientUserId) {
+  const block = document.getElementById('patient-diary-entries');
+  block.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const res = await api(`/api/doctor/patient_diary?patient_user_id=${patientUserId}`);
+    if (!res.plan || !res.entries.length) {
+      block.innerHTML = '<div class="empty">Дневник пока пуст</div>';
+      return;
+    }
+    const byDay = {1:[],2:[],3:[]};
+    res.entries.forEach(e => (byDay[e.day_number] = byDay[e.day_number] || []).push(e));
+    block.innerHTML = [1,2,3].filter(d => byDay[d]?.length).map(d => `
+      <div style="margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">День ${d}</div>
+        ${byDay[d].map(e => `
+          <div class="history-item">
+            <div class="history-text">
+              <b>${e.item_text}</b>${e.done_fraction ? ` — выполнено ${e.done_fraction}` : ''}<br>
+              <span style="color:var(--text-soft)">${e.answer_text||'—'}</span>
+            </div>
+          </div>`).join('')}
+      </div>`).join('');
+  } catch(e) { block.innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`; }
+}
+
+// ── РЕКОМЕНДАЦИЯ ИИ (врач) ────────────────────────────────────────────────────
+async function loadRecommendation(patientUserId) {
+  try {
+    const res = await api(`/api/doctor/recommendation?patient_user_id=${patientUserId}`);
+    const rec = res.recommendation;
+    const card = document.getElementById('recommendation-card');
+    if (!rec || rec.doctor_decision !== 'pending') { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    const label = rec.recommendation === 'increase' ? '⬆️ Усложнить план' : '⬇️ Упростить план';
+    document.getElementById('recommendation-block').innerHTML = `
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px">${label}</div>
+      <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px">${rec.rationale}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="decideRecommendation(${rec.id},'${rec.recommendation}',${patientUserId})" style="flex:1">✓ Согласиться</button>
+        <button class="btn btn-ghost btn-sm" onclick="decideRecommendation(${rec.id},'keep',${patientUserId})" style="flex:1">Оставить как есть</button>
+      </div>
+    `;
+  } catch(e) { console.log('recommendation error:', e); }
+}
+
+async function decideRecommendation(recId, decision, patientUserId) {
+  try {
+    await api('/api/doctor/plan_decision', 'POST', { recommendation_id: recId, decision });
+    tg?.showAlert(decision === 'keep' ? 'План оставлен без изменений.' : 'Новый план сгенерирован и отправлен пациенту.');
+    document.getElementById('recommendation-card').style.display = 'none';
+    loadPatientPlanDoctor(patientUserId);
+  } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
+}
+
+// ── ЛЕКАРСТВА (врач) ──────────────────────────────────────────────────────────
+async function loadPatientMedsDoctor(patientUserId) {
+  const block = document.getElementById('patient-meds-block');
+  block.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const meds = await api(`/api/doctor/medications?patient_user_id=${patientUserId}`);
+    const list = meds.map(m => `
+      <div class="history-item">
+        <div class="history-text"><b>${m.name}</b> ${m.dosage||''}<br>
+          <span style="color:var(--text-soft)">⏰ ${m.times.join(', ')}</span>
+        </div>
+        <button class="task-remove" onclick="deleteMedication(${m.id},${patientUserId})">×</button>
+      </div>`).join('') || '<div class="empty">Лекарства не назначены</div>';
+    block.innerHTML = `
+      ${list}
+      <div class="divider"></div>
+      <div class="form-group"><label class="form-label">Название</label><input type="text" id="med-name" placeholder="Аспирин"></div>
+      <div class="form-group"><label class="form-label">Дозировка</label><input type="text" id="med-dosage" placeholder="100 мг"></div>
+      <div class="form-group"><label class="form-label">Время приёма (через запятую)</label><input type="text" id="med-times" placeholder="09:00, 21:00"></div>
+      <button class="btn btn-primary btn-sm" onclick="addMedicationForPatient(${patientUserId})" style="width:100%">+ Добавить лекарство</button>
+    `;
+  } catch(e) { block.innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`; }
+}
+
+async function addMedicationForPatient(patientUserId) {
+  const name = document.getElementById('med-name').value.trim();
+  const dosage = document.getElementById('med-dosage').value.trim();
+  const times = document.getElementById('med-times').value.split(',').map(t => t.trim()).filter(Boolean);
+  if (!name || !times.length) { tg?.showAlert('Укажите название и хотя бы одно время приёма'); return; }
+  try {
+    await api('/api/doctor/medications/add', 'POST', { patient_user_id: patientUserId, name, dosage, times });
+    loadPatientMedsDoctor(patientUserId);
+  } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
+}
+
+async function deleteMedication(id, patientUserId) {
+  try {
+    await api('/api/doctor/medications/delete', 'POST', { id });
+    loadPatientMedsDoctor(patientUserId);
   } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
 
@@ -793,33 +955,10 @@ function backToList() {
 }
 
 // ── ДОБАВИТЬ ПАЦИЕНТА ─────────────────────────────────────────────────────────
-function addTask() {
-  const input = document.getElementById('new-task-input');
-  if (!input.value.trim()) return;
-  newTasks.push(input.value.trim());
-  input.value = '';
-  renderNewTasks();
-}
-
-function renderNewTasks() {
-  document.getElementById('new-task-list').innerHTML = newTasks.map((t,i) =>
-    `<div class="task-item">• ${t}<button class="task-remove" onclick="removeTask(${i})">×</button></div>`
-  ).join('');
-}
-
-function removeTask(i) {
-  newTasks.splice(i, 1);
-  renderNewTasks();
-}
-
 async function addPatient() {
   const username = document.getElementById('p-username').value.trim().lstrip('@');
   const name = document.getElementById('p-name').value.trim();
   if (!username || !name) { tg?.showAlert('Заполните username и ФИО'); return; }
-
-  const extra = document.getElementById('p-extra').value.trim();
-  let plan = newTasks.map(t => `• ${t}`).join('\n');
-  if (extra) plan += `\n\n${extra}`;
 
   try {
     await api('/api/doctor/add_patient', 'POST', {
@@ -828,15 +967,26 @@ async function addPatient() {
       age: document.getElementById('p-age').value,
       stroke_date: document.getElementById('p-stroke-date').value,
       stroke_type: document.getElementById('p-stroke-type').value,
+      affected_side: document.getElementById('p-affected-side').value,
       comorbidities: document.getElementById('p-comorbidities').value || 'нет',
-      treatment_plan: plan
+      motor_impairment: document.getElementById('p-motor').value,
+      mobility: document.getElementById('p-mobility').value,
+      speech_impairment: document.getElementById('p-speech').value,
+      cognitive_impairment: document.getElementById('p-cognitive').value,
+      swallowing_impairment: document.getElementById('p-swallowing').value,
+      self_assessment: document.getElementById('p-self-assessment').value,
+      psycho_emotional: document.getElementById('p-psycho').value,
+      independence_level: document.getElementById('p-independence').value,
+      pain_syndrome: document.getElementById('p-pain').value,
+      treatment_features: document.getElementById('p-treatment-features').value,
+      other_notes: document.getElementById('p-other').value,
     });
-    newTasks = [];
-    renderNewTasks();
-    ['p-username','p-name','p-age','p-stroke-date','p-comorbidities','p-extra'].forEach(id => {
+    ['p-username','p-name','p-age','p-stroke-date','p-affected-side','p-comorbidities','p-motor',
+     'p-speech','p-cognitive','p-swallowing','p-self-assessment','p-psycho','p-independence',
+     'p-pain','p-treatment-features','p-other'].forEach(id => {
       document.getElementById(id).value = '';
     });
-    tg?.showAlert(`Пациент ${name} добавлен!`);
+    tg?.showAlert(`Пациент ${name} добавлен! Теперь можно сгенерировать ему план.`);
     showDTab('patients');
   } catch(e) {
     tg?.showAlert('Ошибка: ' + (e.message === '400' ? 'Пациент уже добавлен' : e.message));
