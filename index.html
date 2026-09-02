@@ -841,15 +841,47 @@ async function loadPatientPlanDoctor(patientUserId) {
   } catch(e) { block.innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`; }
 }
 
+let planDraft = null;
+
 async function generatePlanForPatient(patientUserId) {
-  tg?.showConfirm('Сгенерировать новый план на 3 дня? ИИ учтёт весь профиль пациента.', async (ok) => {
-    if (!ok) return;
-    try {
-      await api('/api/doctor/generate_plan', 'POST', { patient_user_id: patientUserId });
-      tg?.showAlert('Новый план готов! Пациент получил уведомление.');
-      loadPatientPlanDoctor(patientUserId);
-    } catch(e) { tg?.showAlert('Ошибка генерации: ' + e.message); }
-  });
+  const block = document.getElementById('patient-plan-block');
+  block.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const res = await api('/api/doctor/generate_plan', 'POST', { patient_user_id: patientUserId });
+    planDraft = res.plan;
+    renderPlanDraft(patientUserId);
+  } catch(e) {
+    tg?.showAlert('Ошибка генерации: ' + e.message);
+    loadPatientPlanDoctor(patientUserId);
+  }
+}
+
+function renderPlanDraft(patientUserId) {
+  const block = document.getElementById('patient-plan-block');
+  const days = [1,2,3].map(d => {
+    const items = planDraft[`day${d}`] || [];
+    return `<div style="margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600">День ${d}</div>
+      ${items.map(it => `<div style="font-size:13px;padding:2px 0 2px 8px">• ${it.text}${it.duration_minutes?` (${it.duration_minutes} мин)`:''}</div>`).join('')}
+    </div>`;
+  }).join('');
+  block.innerHTML = `
+    <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px">📝 Черновик — пациент его ещё не видит</div>
+    ${days}
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button class="btn btn-primary btn-sm" onclick="confirmPlanDraft(${patientUserId})" style="flex:1">✓ Ок, отправить пациенту</button>
+      <button class="btn btn-ghost btn-sm" onclick="generatePlanForPatient(${patientUserId})" style="flex:1">🔄 Сгенерировать другой</button>
+    </div>
+  `;
+}
+
+async function confirmPlanDraft(patientUserId) {
+  try {
+    await api('/api/doctor/confirm_plan', 'POST', { patient_user_id: patientUserId, plan: planDraft });
+    planDraft = null;
+    tg?.showAlert('План отправлен пациенту!');
+    loadPatientPlanDoctor(patientUserId);
+  } catch(e) { tg?.showAlert('Ошибка: ' + e.message); }
 }
 
 // ── ДНЕВНИК (врач) ────────────────────────────────────────────────────────────
